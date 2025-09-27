@@ -38,21 +38,21 @@ outputType = "webview"
 name = "Trading Backend API"
 author = "agent"
 
+[workflows.workflow.metadata]
+outputType = "console"
+
 [[workflows.workflow.tasks]]
 task = "shell.exec"
 args = "cd frontend && python simple_backend.py"
 waitForPort = 8000
-
-[workflows.workflow.metadata]
-outputType = "console"
 
 [[ports]]
 localPort = 5000
 externalPort = 80
 
 [[ports]]
-localPort = 46093
-externalPort = 3000
+localPort = 8000
+externalPort = 8000
 
 [deployment]
 deploymentTarget = "vm"
