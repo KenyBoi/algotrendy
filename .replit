@@ -50,10 +50,6 @@ outputType = "webview"
 localPort = 5000
 externalPort = 80
 
-[[ports]]
-localPort = 46119
-externalPort = 3000
-
 [deployment]
 deploymentTarget = "vm"
 run = ["python", "-m", "uvicorn", "ai_orchestrator_api:app", "--host", "0.0.0.0", "--port", "5000"]
