@@ -130,6 +130,11 @@ class TradingDashboard {
         
         actionButtons.forEach(button => {
             button.addEventListener('click', (e) => {
+                // Handle backend control button separately
+                if (button.id === 'backend-control-btn') {
+                    return; // Handled by setupBackendControl
+                }
+                
                 const buttonText = button.textContent.trim();
                 
                 switch(buttonText) {
@@ -147,6 +152,129 @@ class TradingDashboard {
                 }
             });
         });
+        
+        // Setup backend control button
+        this.setupBackendControl();
+    }
+
+    setupBackendControl() {
+        const backendBtn = document.getElementById('backend-control-btn');
+        const backendText = document.getElementById('backend-control-text');
+        
+        if (!backendBtn || !backendText) return;
+        
+        // Update button state based on backend status
+        this.updateBackendControlButton();
+        
+        backendBtn.addEventListener('click', async (e) => {
+            e.preventDefault();
+            
+            const isOffline = this.backendStatus === 'backend_unreachable';
+            
+            if (isOffline) {
+                await this.startBackend();
+            } else {
+                await this.stopBackend();
+            }
+        });
+    }
+
+    updateBackendControlButton() {
+        const backendBtn = document.getElementById('backend-control-btn');
+        const backendText = document.getElementById('backend-control-text');
+        
+        if (!backendBtn || !backendText) return;
+        
+        const isOffline = this.backendStatus === 'backend_unreachable';
+        
+        if (isOffline) {
+            backendText.textContent = 'Start Backend';
+            backendBtn.className = 'action-btn success';
+            backendBtn.querySelector('i').className = 'fas fa-play';
+        } else {
+            backendText.textContent = 'Stop Backend';
+            backendBtn.className = 'action-btn danger';
+            backendBtn.querySelector('i').className = 'fas fa-stop';
+        }
+    }
+
+    async startBackend() {
+        const backendBtn = document.getElementById('backend-control-btn');
+        const backendText = document.getElementById('backend-control-text');
+        
+        // Show loading state
+        backendText.textContent = 'Starting...';
+        backendBtn.disabled = true;
+        
+        try {
+            const response = await fetch('/api/backend/start', {
+                method: 'POST',
+                headers: {
+                    'Content-Type': 'application/json'
+                }
+            });
+            
+            const data = await response.json();
+            
+            if (data.status === 'success' || data.status === 'timeout') {
+                this.showMessage(data.message, data.status === 'timeout' ? 'warning' : 'success');
+                
+                // Wait a moment then check status
+                setTimeout(async () => {
+                    await this.checkBackendStatus();
+                    this.updateBackendControlButton();
+                }, 3000);
+            } else {
+                this.showMessage(data.message, 'error');
+            }
+        } catch (error) {
+            console.error('Failed to start backend:', error);
+            this.showMessage('Failed to start backend', 'error');
+        } finally {
+            backendBtn.disabled = false;
+            if (backendText.textContent === 'Starting...') {
+                backendText.textContent = 'Start Backend';
+            }
+        }
+    }
+
+    async stopBackend() {
+        const backendBtn = document.getElementById('backend-control-btn');
+        const backendText = document.getElementById('backend-control-text');
+        
+        // Show loading state
+        backendText.textContent = 'Stopping...';
+        backendBtn.disabled = true;
+        
+        try {
+            const response = await fetch('/api/backend/stop', {
+                method: 'POST',
+                headers: {
+                    'Content-Type': 'application/json'
+                }
+            });
+            
+            const data = await response.json();
+            
+            if (data.status === 'success') {
+                this.showMessage(data.message, 'success');
+                
+                // Update status immediately
+                this.backendStatus = 'backend_unreachable';
+                this.updateBackendControlButton();
+                this.updateBackendStatusDisplay();
+            } else {
+                this.showMessage(data.message, 'error');
+            }
+        } catch (error) {
+            console.error('Failed to stop backend:', error);
+            this.showMessage('Failed to stop backend', 'error');
+        } finally {
+            backendBtn.disabled = false;
+            if (backendText.textContent === 'Stopping...') {
+                backendText.textContent = 'Stop Backend';
+            }
+        }
     }
 
     setupTradingDataLoaders() {

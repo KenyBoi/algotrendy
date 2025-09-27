@@ -89,6 +89,43 @@ async def run_backtest(request: Request):
     except Exception as e:
         return {"error": str(e), "status": "failed"}
 
+# Backend Control Endpoints
+@app.post("/api/backend/start")
+async def start_backend():
+    """Start the backend API server"""
+    try:
+        # This would restart the backend workflow
+        import subprocess
+        result = subprocess.run([
+            "replit", "workflow", "restart", "Trading Backend API"
+        ], capture_output=True, text=True, timeout=30)
+        
+        if result.returncode == 0:
+            return {"status": "success", "message": "Backend starting..."}
+        else:
+            return {"status": "error", "message": f"Failed to start backend: {result.stderr}"}
+    except subprocess.TimeoutExpired:
+        return {"status": "timeout", "message": "Backend start timeout - it may still be starting"}
+    except Exception as e:
+        return {"status": "error", "message": f"Failed to start backend: {str(e)}"}
+
+@app.post("/api/backend/stop") 
+async def stop_backend():
+    """Stop the backend API server"""
+    try:
+        # This would stop the backend workflow
+        import subprocess
+        result = subprocess.run([
+            "replit", "workflow", "stop", "Trading Backend API"
+        ], capture_output=True, text=True, timeout=30)
+        
+        if result.returncode == 0:
+            return {"status": "success", "message": "Backend stopped"}
+        else:
+            return {"status": "error", "message": f"Failed to stop backend: {result.stderr}"}
+    except Exception as e:
+        return {"status": "error", "message": f"Failed to stop backend: {str(e)}"}
+
 if __name__ == "__main__":
     # Run the frontend server
     uvicorn.run(
