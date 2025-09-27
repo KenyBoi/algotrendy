@@ -149,7 +149,59 @@
                     </div>
                 </div>
 
-                <!-- Other sections would be added here -->
+                <!-- ML Models Section -->
+                <div id="ml-models" class="content-section">
+                    <div class="section-header">
+                        <h2><i class="fas fa-brain"></i> ML Models</h2>
+                    </div>
+                    
+                    <div class="loading" id="models-loading">
+                        <i class="fas fa-spinner fa-spin"></i> Loading ML models...
+                    </div>
+                    
+                    <div id="models-content" class="models-grid" style="display: none;">
+                        <!-- Models will be loaded here -->
+                    </div>
+                </div>
+
+                <!-- Strategies Section -->
+                <div id="strategies" class="content-section">
+                    <div class="section-header">
+                        <h2><i class="fas fa-chess-knight"></i> Trading Strategies</h2>
+                    </div>
+                    
+                    <div class="loading" id="strategies-loading">
+                        <i class="fas fa-spinner fa-spin"></i> Loading strategies...
+                    </div>
+                    
+                    <div id="strategies-content" class="strategies-grid" style="display: none;">
+                        <!-- Strategies will be loaded here -->
+                    </div>
+                </div>
+
+                <!-- Backtesting Section -->
+                <div id="backtesting" class="content-section">
+                    <div class="section-header">
+                        <h2><i class="fas fa-chart-bar"></i> Backtesting Results</h2>
+                    </div>
+                    
+                    <div class="loading" id="backtests-loading">
+                        <i class="fas fa-spinner fa-spin"></i> Loading backtests...
+                    </div>
+                    
+                    <div id="backtests-content" style="display: none;">
+                        <div class="backtest-controls">
+                            <button class="action-btn primary" id="new-backtest-btn">
+                                <i class="fas fa-play"></i> Run New Backtest
+                            </button>
+                        </div>
+                        <div class="backtests-grid">
+                            <!-- Backtests will be loaded here -->
+                        </div>
+                    </div>
+                </div>
+
+                <!-- Other sections -->
                 <div id="portfolio" class="content-section">
                     <div class="section-header">
                         <h2><i class="fas fa-wallet"></i> Portfolio Management</h2>

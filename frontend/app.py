@@ -47,6 +47,48 @@ async def frontend_health():
     """Frontend health check"""
     return {"status": "healthy", "service": "AlgoTrendy Frontend"}
 
+# Trading system proxy endpoints
+@app.get("/api/trading/models")
+async def get_trading_models():
+    """Get ML models from backend"""
+    try:
+        async with httpx.AsyncClient() as client:
+            response = await client.get(f"{BACKEND_URL}/trading/models")
+            return response.json()
+    except Exception as e:
+        return {"error": str(e), "models": [], "total_models": 0}
+
+@app.get("/api/trading/strategies")
+async def get_trading_strategies():
+    """Get trading strategies from backend"""
+    try:
+        async with httpx.AsyncClient() as client:
+            response = await client.get(f"{BACKEND_URL}/trading/strategies")
+            return response.json()
+    except Exception as e:
+        return {"error": str(e), "strategies": [], "total_strategies": 0}
+
+@app.get("/api/trading/backtests")
+async def get_backtest_results():
+    """Get backtest results from backend"""
+    try:
+        async with httpx.AsyncClient() as client:
+            response = await client.get(f"{BACKEND_URL}/trading/backtests")
+            return response.json()
+    except Exception as e:
+        return {"error": str(e), "backtests": [], "total_backtests": 0}
+
+@app.post("/api/trading/backtests/run")
+async def run_backtest(request: Request):
+    """Run a new backtest"""
+    try:
+        data = await request.json()
+        async with httpx.AsyncClient() as client:
+            response = await client.post(f"{BACKEND_URL}/trading/backtests/run", json=data)
+            return response.json()
+    except Exception as e:
+        return {"error": str(e), "status": "failed"}
+
 if __name__ == "__main__":
     # Run the frontend server
     uvicorn.run(

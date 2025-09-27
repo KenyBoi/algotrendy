@@ -30,6 +30,9 @@ class TradingDashboard {
         // Setup action buttons
         this.setupActionButtons();
         
+        // Load trading system data when sections are activated
+        this.setupTradingDataLoaders();
+        
         console.log('✅ Dashboard initialized successfully');
     }
 
@@ -38,7 +41,7 @@ class TradingDashboard {
         const contentSections = document.querySelectorAll('.content-section');
 
         navLinks.forEach(link => {
-            link.addEventListener('click', (e) => {
+            link.addEventListener('click', async (e) => {
                 e.preventDefault();
                 
                 const targetId = link.getAttribute('href').substring(1);
@@ -55,6 +58,19 @@ class TradingDashboard {
                 const targetSection = document.getElementById(targetId);
                 if (targetSection) {
                     targetSection.classList.add('active');
+                    
+                    // Load data for AI Systems sections
+                    switch(targetId) {
+                        case 'ml-models':
+                            await this.loadMLModels();
+                            break;
+                        case 'strategies':
+                            await this.loadStrategies();
+                            break;
+                        case 'backtesting':
+                            await this.loadBacktests();
+                            break;
+                    }
                 }
             });
         });
@@ -130,6 +146,230 @@ class TradingDashboard {
                         this.showMessage(`${buttonText} clicked`, 'info');
                 }
             });
+        });
+    }
+
+    setupTradingDataLoaders() {
+        // Load data when sections are first accessed
+        this.dataLoaded = {
+            models: false,
+            strategies: false,
+            backtests: false
+        };
+    }
+
+    async loadMLModels() {
+        if (this.dataLoaded.models) return;
+        
+        console.log('📊 Loading ML models...');
+        const loadingEl = document.getElementById('models-loading');
+        const contentEl = document.getElementById('models-content');
+        
+        try {
+            const response = await fetch('/api/trading/models');
+            const data = await response.json();
+            
+            if (data.error) {
+                throw new Error(data.error);
+            }
+            
+            this.renderMLModels(data.models);
+            this.dataLoaded.models = true;
+            
+            loadingEl.style.display = 'none';
+            contentEl.style.display = 'grid';
+            
+        } catch (error) {
+            console.error('Failed to load ML models:', error);
+            loadingEl.innerHTML = `<div class="error-message">Failed to load ML models: ${error.message}</div>`;
+        }
+    }
+
+    async loadStrategies() {
+        if (this.dataLoaded.strategies) return;
+        
+        console.log('⚔️ Loading trading strategies...');
+        const loadingEl = document.getElementById('strategies-loading');
+        const contentEl = document.getElementById('strategies-content');
+        
+        try {
+            const response = await fetch('/api/trading/strategies');
+            const data = await response.json();
+            
+            if (data.error) {
+                throw new Error(data.error);
+            }
+            
+            this.renderStrategies(data.strategies);
+            this.dataLoaded.strategies = true;
+            
+            loadingEl.style.display = 'none';
+            contentEl.style.display = 'grid';
+            
+        } catch (error) {
+            console.error('Failed to load strategies:', error);
+            loadingEl.innerHTML = `<div class="error-message">Failed to load strategies: ${error.message}</div>`;
+        }
+    }
+
+    async loadBacktests() {
+        if (this.dataLoaded.backtests) return;
+        
+        console.log('📈 Loading backtest results...');
+        const loadingEl = document.getElementById('backtests-loading');
+        const contentEl = document.getElementById('backtests-content');
+        
+        try {
+            const response = await fetch('/api/trading/backtests');
+            const data = await response.json();
+            
+            if (data.error) {
+                throw new Error(data.error);
+            }
+            
+            this.renderBacktests(data.backtests);
+            this.dataLoaded.backtests = true;
+            
+            loadingEl.style.display = 'none';
+            contentEl.style.display = 'block';
+            
+        } catch (error) {
+            console.error('Failed to load backtests:', error);
+            loadingEl.innerHTML = `<div class="error-message">Failed to load backtests: ${error.message}</div>`;
+        }
+    }
+
+    renderMLModels(models) {
+        const container = document.getElementById('models-content');
+        container.innerHTML = '';
+        
+        models.forEach(model => {
+            const modelCard = document.createElement('div');
+            modelCard.className = 'model-card';
+            
+            modelCard.innerHTML = `
+                <div class="card-header">
+                    <div>
+                        <div class="card-title">${model.name}</div>
+                        <div class="card-subtitle">${model.symbol} • ${model.asset_type}</div>
+                    </div>
+                    <span class="status-badge ${model.status}">${model.status}</span>
+                </div>
+                <div class="metrics-grid">
+                    <div class="metric-item">
+                        <span class="metric-label">Accuracy</span>
+                        <span class="metric-value">${(model.accuracy * 100).toFixed(1)}%</span>
+                    </div>
+                    <div class="metric-item">
+                        <span class="metric-label">Precision</span>
+                        <span class="metric-value">${(model.precision * 100).toFixed(1)}%</span>
+                    </div>
+                    <div class="metric-item">
+                        <span class="metric-label">Recall</span>
+                        <span class="metric-value">${(model.recall * 100).toFixed(1)}%</span>
+                    </div>
+                    <div class="metric-item">
+                        <span class="metric-label">Sharpe Ratio</span>
+                        <span class="metric-value positive">${model.sharpe_ratio.toFixed(2)}</span>
+                    </div>
+                </div>
+                <div style="margin-top: 1rem; font-size: 0.875rem; color: var(--text-secondary);">
+                    Last trained: ${new Date(model.last_trained).toLocaleDateString()}
+                </div>
+            `;
+            
+            container.appendChild(modelCard);
+        });
+    }
+
+    renderStrategies(strategies) {
+        const container = document.getElementById('strategies-content');
+        container.innerHTML = '';
+        
+        strategies.forEach(strategy => {
+            const strategyCard = document.createElement('div');
+            strategyCard.className = 'strategy-card';
+            
+            const metrics = strategy.performance_metrics;
+            
+            strategyCard.innerHTML = `
+                <div class="card-header">
+                    <div>
+                        <div class="card-title">${strategy.name}</div>
+                        <div class="card-subtitle">${strategy.strategy_type} • ${strategy.asset_type}</div>
+                    </div>
+                    <span class="status-badge ${strategy.status}">${strategy.status}</span>
+                </div>
+                <div style="margin-bottom: 1rem; color: var(--text-secondary); font-size: 0.9rem;">
+                    ${strategy.description}
+                </div>
+                <div class="metrics-grid">
+                    <div class="metric-item">
+                        <span class="metric-label">Win Rate</span>
+                        <span class="metric-value">${(metrics.win_rate * 100).toFixed(1)}%</span>
+                    </div>
+                    <div class="metric-item">
+                        <span class="metric-label">Avg Return</span>
+                        <span class="metric-value positive">${(metrics.avg_return * 100).toFixed(2)}%</span>
+                    </div>
+                    <div class="metric-item">
+                        <span class="metric-label">Max Drawdown</span>
+                        <span class="metric-value negative">-${(metrics.max_drawdown * 100).toFixed(1)}%</span>
+                    </div>
+                    <div class="metric-item">
+                        <span class="metric-label">Sharpe Ratio</span>
+                        <span class="metric-value positive">${metrics.sharpe_ratio.toFixed(2)}</span>
+                    </div>
+                </div>
+            `;
+            
+            container.appendChild(strategyCard);
+        });
+    }
+
+    renderBacktests(backtests) {
+        const container = document.querySelector('.backtests-grid');
+        container.innerHTML = '';
+        
+        backtests.forEach(backtest => {
+            const backtestCard = document.createElement('div');
+            backtestCard.className = 'backtest-card';
+            
+            backtestCard.innerHTML = `
+                <div class="card-header">
+                    <div>
+                        <div class="card-title">${backtest.strategy_name}</div>
+                        <div class="card-subtitle">${backtest.symbol} • ${backtest.start_date} to ${backtest.end_date}</div>
+                    </div>
+                    <span class="status-badge ${backtest.status}">${backtest.status}</span>
+                </div>
+                <div class="metrics-grid">
+                    <div class="metric-item">
+                        <span class="metric-label">Total Return</span>
+                        <span class="metric-value positive">${(backtest.total_return * 100).toFixed(1)}%</span>
+                    </div>
+                    <div class="metric-item">
+                        <span class="metric-label">Sharpe Ratio</span>
+                        <span class="metric-value positive">${backtest.sharpe_ratio.toFixed(2)}</span>
+                    </div>
+                    <div class="metric-item">
+                        <span class="metric-label">Max Drawdown</span>
+                        <span class="metric-value negative">-${(backtest.max_drawdown * 100).toFixed(1)}%</span>
+                    </div>
+                    <div class="metric-item">
+                        <span class="metric-label">Win Rate</span>
+                        <span class="metric-value">${(backtest.win_rate * 100).toFixed(1)}%</span>
+                    </div>
+                </div>
+                <div style="margin-top: 1rem;">
+                    <div style="display: flex; justify-content: space-between; font-size: 0.875rem; color: var(--text-secondary);">
+                        <span>Final Value: ${TradingUtils.formatCurrency(backtest.final_value)}</span>
+                        <span>Total Trades: ${backtest.total_trades}</span>
+                    </div>
+                </div>
+            `;
+            
+            container.appendChild(backtestCard);
         });
     }
 

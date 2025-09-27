@@ -16,23 +16,11 @@ author = "agent"
 
 [[workflows.workflow.tasks]]
 task = "workflow.run"
-args = "Trading Backend API"
+args = "Trading Frontend"
 
 [[workflows.workflow.tasks]]
 task = "workflow.run"
-args = "Trading Frontend"
-
-[[workflows.workflow]]
-name = "Trading Backend API"
-author = "agent"
-
-[[workflows.workflow.tasks]]
-task = "shell.exec"
-args = "cd src && python -m uvicorn ai_orchestrator_api:app --host localhost --port 8000 --reload"
-waitForPort = 8000
-
-[workflows.workflow.metadata]
-outputType = "console"
+args = "Trading Backend API"
 
 [[workflows.workflow]]
 name = "Trading Frontend"
@@ -46,9 +34,25 @@ waitForPort = 5000
 [workflows.workflow.metadata]
 outputType = "webview"
 
+[[workflows.workflow]]
+name = "Trading Backend API"
+author = "agent"
+
+[[workflows.workflow.tasks]]
+task = "shell.exec"
+args = "cd frontend && python simple_backend.py"
+waitForPort = 8000
+
+[workflows.workflow.metadata]
+outputType = "console"
+
 [[ports]]
 localPort = 5000
 externalPort = 80
+
+[[ports]]
+localPort = 36335
+externalPort = 3000
 
 [deployment]
 deploymentTarget = "vm"
