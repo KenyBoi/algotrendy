@@ -7,6 +7,7 @@ with load balancing, failover, and response optimization capabilities.
 
 import asyncio
 import logging
+import os
 import time
 from abc import ABC, abstractmethod
 from dataclasses import dataclass, field
