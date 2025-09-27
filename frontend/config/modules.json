@@ -1,0 +1,96 @@
+{
+  "modules": {
+    "portfolio": {
+      "id": "portfolio",
+      "name": "Portfolio Management",
+      "description": "Portfolio tracking, positions, and analytics",
+      "enabled": true,
+      "dependencies": [],
+      "endpoints": ["/api/portfolio", "/api/positions", "/api/portfolio/performance"],
+      "navSection": "Dashboard"
+    },
+    "trading": {
+      "id": "trading", 
+      "name": "Trading",
+      "description": "Buy/sell orders and execution",
+      "enabled": true,
+      "dependencies": ["market_data"],
+      "endpoints": ["/api/orders", "/api/orders/cancel", "/api/watchlist"],
+      "navSection": "Trading"
+    },
+    "market_data": {
+      "id": "market_data",
+      "name": "Market Data",
+      "description": "Real-time market information and quotes",
+      "enabled": true,
+      "dependencies": [],
+      "endpoints": ["/api/market/symbols", "/api/market/quote", "/api/market/history"],
+      "navSection": "Trading"
+    },
+    "strategies": {
+      "id": "strategies",
+      "name": "Strategies",
+      "description": "Trading strategy management and execution",
+      "enabled": true,
+      "dependencies": ["market_data"],
+      "endpoints": ["/api/strategies", "/api/strategies/run", "/api/strategies/stop"],
+      "navSection": "AI Systems"
+    },
+    "backtesting": {
+      "id": "backtesting",
+      "name": "Backtesting",
+      "description": "Historical strategy testing and analysis",
+      "enabled": true,
+      "dependencies": ["strategies", "market_data"],
+      "endpoints": ["/api/backtests", "/api/backtests/run", "/api/backtests/results"],
+      "navSection": "AI Systems"
+    },
+    "ml_models": {
+      "id": "ml_models",
+      "name": "ML Models",
+      "description": "Machine learning models for trading",
+      "enabled": true,
+      "dependencies": ["market_data"],
+      "endpoints": ["/api/models", "/api/models/train", "/api/models/predict"],
+      "navSection": "AI Systems"
+    },
+    "stocks": {
+      "id": "stocks",
+      "name": "Stocks",
+      "description": "Stock trading interface",
+      "enabled": true,
+      "dependencies": ["trading", "market_data"],
+      "endpoints": [],
+      "navSection": "Trading"
+    },
+    "futures": {
+      "id": "futures",
+      "name": "Futures",
+      "description": "Futures trading interface",
+      "enabled": true,
+      "dependencies": ["trading", "market_data"],
+      "endpoints": [],
+      "navSection": "Trading"
+    },
+    "crypto": {
+      "id": "crypto",
+      "name": "Crypto",
+      "description": "Cryptocurrency trading interface",
+      "enabled": true,
+      "dependencies": ["trading", "market_data"],
+      "endpoints": [],
+      "navSection": "Trading"
+    },
+    "signals": {
+      "id": "signals",
+      "name": "Trading Signals",
+      "description": "Real-time trading signals and alerts",
+      "enabled": true,
+      "dependencies": ["market_data", "strategies"],
+      "endpoints": [],
+      "navSection": "Dashboard"
+    }
+  },
+  "version": "1.0.0",
+  "lastUpdated": "2024-09-27T00:00:00Z"
+}

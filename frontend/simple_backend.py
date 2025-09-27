@@ -2,6 +2,7 @@
 """
 Simple standalone backend API for AlgoTrendy frontend
 Provides mock trading data without complex dependencies
+With modular architecture support for enabling/disabling features
 """
 
 from fastapi import FastAPI, HTTPException, Path, Query
@@ -9,14 +10,241 @@ from fastapi.middleware.cors import CORSMiddleware
 from pydantic import BaseModel
 from typing import Optional, List, Dict, Any
 from datetime import datetime, date, timedelta
+from functools import wraps
+from pathlib import Path as FilePath
 import uvicorn
 import logging
 import random
 import json
+import os
 
 # Configure logging
 logging.basicConfig(level=logging.INFO)
 logger = logging.getLogger(__name__)
+
+# ============================================================================
+# MODULE CONFIGURATION SYSTEM
+# ============================================================================
+
+class ModuleManager:
+    """Manages module configuration and dependencies"""
+    
+    def __init__(self):
+        self.config_path = FilePath("config/modules.json")
+        self.modules_config = self.load_modules_config()
+        self.apply_environment_overrides()
+        self.log_module_status()
+        
+    def load_modules_config(self):
+        """Load module configuration from JSON file"""
+        try:
+            if self.config_path.exists():
+                with open(self.config_path, 'r') as f:
+                    config = json.load(f)
+                    logger.info(f"✅ Loaded module configuration from {self.config_path}")
+                    return config
+            else:
+                logger.warning(f"⚠️ Module config not found at {self.config_path}, using defaults")
+                return self.get_default_config()
+        except Exception as e:
+            logger.error(f"❌ Failed to load module config: {e}")
+            return self.get_default_config()
+    
+    def get_default_config(self):
+        """Return default module configuration"""
+        return {
+            "modules": {
+                "portfolio": {
+                    "id": "portfolio",
+                    "name": "Portfolio Management",
+                    "enabled": True,
+                    "description": "Portfolio tracking and analytics",
+                    "dependencies": []
+                },
+                "trading": {
+                    "id": "trading",
+                    "name": "Trading",
+                    "enabled": True,
+                    "description": "Buy/sell orders and execution",
+                    "dependencies": ["market_data"]
+                },
+                "market_data": {
+                    "id": "market_data",
+                    "name": "Market Data",
+                    "enabled": True,
+                    "description": "Real-time market information",
+                    "dependencies": []
+                },
+                "strategies": {
+                    "id": "strategies",
+                    "name": "Strategies",
+                    "enabled": True,
+                    "description": "Trading strategy management",
+                    "dependencies": ["market_data"]
+                },
+                "backtesting": {
+                    "id": "backtesting",
+                    "name": "Backtesting",
+                    "enabled": True,
+                    "description": "Historical strategy testing",
+                    "dependencies": ["strategies", "market_data"]
+                },
+                "ml_models": {
+                    "id": "ml_models",
+                    "name": "ML Models",
+                    "enabled": True,
+                    "description": "Machine learning models",
+                    "dependencies": ["market_data"]
+                },
+                "stocks": {
+                    "id": "stocks",
+                    "name": "Stocks",
+                    "enabled": True,
+                    "description": "Stock trading interface",
+                    "dependencies": ["trading", "market_data"]
+                },
+                "futures": {
+                    "id": "futures",
+                    "name": "Futures",
+                    "enabled": True,
+                    "description": "Futures trading interface",
+                    "dependencies": ["trading", "market_data"]
+                },
+                "crypto": {
+                    "id": "crypto",
+                    "name": "Crypto",
+                    "enabled": True,
+                    "description": "Cryptocurrency trading interface",
+                    "dependencies": ["trading", "market_data"]
+                },
+                "signals": {
+                    "id": "signals",
+                    "name": "Trading Signals",
+                    "enabled": True,
+                    "description": "Real-time trading signals and alerts",
+                    "dependencies": ["market_data", "strategies"]
+                }
+            },
+            "version": "1.0.0"
+        }
+    
+    def apply_environment_overrides(self):
+        """Apply environment variable overrides for enabled modules"""
+        enabled_modules_env = os.environ.get('ENABLED_MODULES')
+        if enabled_modules_env:
+            enabled_list = [m.strip().lower() for m in enabled_modules_env.split(',')]
+            logger.info(f"🔧 Applying environment override - Enabled modules: {enabled_list}")
+            
+            # Disable all modules first
+            for module_id in self.modules_config.get('modules', {}):
+                self.modules_config['modules'][module_id]['enabled'] = False
+            
+            # Enable only specified modules
+            for module_id in enabled_list:
+                if module_id in self.modules_config.get('modules', {}):
+                    self.modules_config['modules'][module_id]['enabled'] = True
+    
+    def log_module_status(self):
+        """Log the status of all modules at startup"""
+        logger.info("=" * 60)
+        logger.info("📦 MODULE CONFIGURATION STATUS")
+        logger.info("=" * 60)
+        
+        for module_id, config in self.modules_config.get('modules', {}).items():
+            status = "✅ ENABLED" if config.get('enabled') else "❌ DISABLED"
+            logger.info(f"  {module_id:<15} {status:<12} - {config.get('description', '')}")
+        
+        logger.info("=" * 60)
+    
+    def is_module_enabled(self, module_id: str) -> bool:
+        """Check if a module is enabled"""
+        module = self.modules_config.get('modules', {}).get(module_id, {})
+        return module.get('enabled', False)
+    
+    def check_dependencies(self, module_id: str) -> bool:
+        """Check if all dependencies for a module are enabled"""
+        module = self.modules_config.get('modules', {}).get(module_id, {})
+        dependencies = module.get('dependencies', [])
+        
+        for dep in dependencies:
+            if not self.is_module_enabled(dep):
+                logger.warning(f"⚠️ Module '{module_id}' dependency '{dep}' is not enabled")
+                return False
+        return True
+    
+    def get_enabled_modules(self) -> Dict[str, Any]:
+        """Get list of enabled modules with their configuration"""
+        enabled = {}
+        for module_id, module_config in self.modules_config.get('modules', {}).items():
+            if module_config.get('enabled', False):
+                enabled[module_id] = module_config
+        return enabled
+    
+    def get_all_modules(self) -> Dict[str, Any]:
+        """Get all modules with their configuration"""
+        return self.modules_config.get('modules', {})
+    
+    def update_module_status(self, module_id: str, enabled: bool) -> bool:
+        """Update module enabled status (runtime only, doesn't persist to file)"""
+        if module_id in self.modules_config.get('modules', {}):
+            self.modules_config['modules'][module_id]['enabled'] = enabled
+            status = "enabled" if enabled else "disabled"
+            logger.info(f"🔄 Module '{module_id}' {status} at runtime")
+            return True
+        return False
+    
+    def get_module_config_response(self) -> Dict[str, Any]:
+        """Get module configuration for API response"""
+        modules = {}
+        for module_id, config in self.modules_config.get('modules', {}).items():
+            modules[module_id] = {
+                "id": config.get('id', module_id),
+                "name": config.get('name', ''),
+                "description": config.get('description', ''),
+                "enabled": config.get('enabled', False),
+                "dependencies": config.get('dependencies', []),
+                "dependenciesMet": self.check_dependencies(module_id)
+            }
+        
+        return {
+            "modules": modules,
+            "version": self.modules_config.get('version', '1.0.0'),
+            "lastUpdated": self.modules_config.get('lastUpdated', datetime.now().isoformat())
+        }
+
+# Initialize module manager
+module_manager = ModuleManager()
+
+def require_module(module_id: str):
+    """Decorator to check if a module is enabled before executing endpoint"""
+    def decorator(func):
+        @wraps(func)
+        async def wrapper(*args, **kwargs):
+            if not module_manager.is_module_enabled(module_id):
+                module_name = module_manager.modules_config.get('modules', {}).get(module_id, {}).get('name', module_id)
+                raise HTTPException(
+                    status_code=503,
+                    detail={
+                        "error": "module_disabled",
+                        "module": module_id,
+                        "message": f"The {module_name} module is currently disabled. Enable it in the configuration to use this feature."
+                    }
+                )
+            
+            # Check dependencies
+            if not module_manager.check_dependencies(module_id):
+                raise HTTPException(
+                    status_code=503,
+                    detail={
+                        "error": "dependencies_not_met",
+                        "module": module_id,
+                        "message": f"Module dependencies are not met. Please enable required modules."
+                    }
+                )
+            
+            return await func(*args, **kwargs)
+        return wrapper
+    return decorator
 
 # Pydantic Models for Request/Response
 class OrderRequest(BaseModel):
@@ -80,24 +308,73 @@ async def health_check():
 
 @app.get("/api/status")
 async def api_status():
-    """API status endpoint"""
+    """API status endpoint with module status"""
+    # Determine service status based on module configuration
+    services = {}
+    module_status = {}
+    
+    for module_id in ["trading", "market_data", "backtesting", "ml_models", "portfolio", "strategies"]:
+        is_enabled = module_manager.is_module_enabled(module_id)
+        deps_met = module_manager.check_dependencies(module_id)
+        
+        if module_id in ["trading", "market_data", "backtesting", "ml_models"]:
+            services[module_id] = "active" if (is_enabled and deps_met) else "disabled"
+        
+        module_status[module_id] = {
+            "enabled": is_enabled,
+            "dependencies_met": deps_met,
+            "status": "active" if (is_enabled and deps_met) else "disabled"
+        }
+    
     return {
         "status": "online",
         "version": "1.0.0",
         "timestamp": datetime.now().isoformat(),
-        "services": {
-            "trading": "active",
-            "market_data": "active",
-            "backtesting": "active",
-            "ml_models": "active"
+        "services": services,
+        "modules": module_status,
+        "modules_summary": {
+            "total": len(module_status),
+            "enabled": sum(1 for m in module_status.values() if m["enabled"]),
+            "active": sum(1 for m in module_status.values() if m["status"] == "active")
         }
     }
+
+@app.get("/api/config/modules")
+async def get_module_configuration():
+    """Get module configuration and status"""
+    try:
+        return module_manager.get_module_config_response()
+    except Exception as e:
+        logger.error(f"Failed to get module configuration: {e}")
+        raise HTTPException(status_code=500, detail=str(e))
+
+@app.post("/api/config/modules/{module_id}/toggle")
+async def toggle_module(module_id: str):
+    """Toggle module enabled status (runtime only)"""
+    try:
+        current_status = module_manager.is_module_enabled(module_id)
+        new_status = not current_status
+        
+        if module_manager.update_module_status(module_id, new_status):
+            return {
+                "module": module_id,
+                "enabled": new_status,
+                "message": f"Module '{module_id}' {'enabled' if new_status else 'disabled'} successfully"
+            }
+        else:
+            raise HTTPException(status_code=404, detail=f"Module '{module_id}' not found")
+    except HTTPException:
+        raise
+    except Exception as e:
+        logger.error(f"Failed to toggle module: {e}")
+        raise HTTPException(status_code=500, detail=str(e))
 
 # =============================================================================
 # PORTFOLIO MANAGEMENT ENDPOINTS
 # =============================================================================
 
 @app.get("/api/portfolio")
+@require_module("portfolio")
 async def get_portfolio():
     """Get portfolio overview with balance, positions, and P&L"""
     try:
@@ -131,6 +408,7 @@ async def get_portfolio():
         raise HTTPException(status_code=500, detail=str(e))
 
 @app.get("/api/positions")
+@require_module("portfolio")
 async def get_positions():
     """Get current positions list"""
     try:
@@ -205,6 +483,7 @@ async def get_positions():
         raise HTTPException(status_code=500, detail=str(e))
 
 @app.get("/api/portfolio/performance")
+@require_module("portfolio")
 async def get_portfolio_performance():
     """Get historical portfolio performance data"""
     try:
@@ -247,6 +526,7 @@ async def get_portfolio_performance():
 # =============================================================================
 
 @app.post("/api/orders")
+@require_module("trading")
 async def submit_order(order: OrderRequest):
     """Submit a new buy/sell order"""
     try:
@@ -276,6 +556,7 @@ async def submit_order(order: OrderRequest):
         raise HTTPException(status_code=500, detail=str(e))
 
 @app.get("/api/orders")
+@require_module("trading")
 async def get_orders(status: Optional[str] = Query(None), limit: int = Query(50, ge=1, le=100)):
     """Get order history and status"""
     try:
@@ -376,6 +657,7 @@ async def get_orders(status: Optional[str] = Query(None), limit: int = Query(50,
         raise HTTPException(status_code=500, detail=str(e))
 
 @app.get("/api/orders/{order_id}")
+@require_module("trading")
 async def get_order_details(order_id: str = Path(...)):
     """Get specific order details"""
     try:
@@ -418,6 +700,7 @@ async def get_order_details(order_id: str = Path(...)):
         raise HTTPException(status_code=500, detail=str(e))
 
 @app.delete("/api/orders/{order_id}")
+@require_module("trading")
 async def cancel_order(order_id: str = Path(...)):
     """Cancel an order"""
     try:
@@ -437,6 +720,7 @@ async def cancel_order(order_id: str = Path(...)):
 # =============================================================================
 
 @app.get("/api/market/prices")
+@require_module("market_data")
 async def get_market_prices():
     """Get current market prices"""
     try:

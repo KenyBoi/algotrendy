@@ -33,26 +33,33 @@
                     <h3><i class="fas fa-tachometer-alt"></i> Dashboard</h3>
                     <ul>
                         <li><a href="#overview" class="nav-link active">Overview</a></li>
-                        <li><a href="#portfolio" class="nav-link">Portfolio</a></li>
-                        <li><a href="#signals" class="nav-link">Trading Signals</a></li>
+                        <li><a href="#portfolio" class="nav-link" data-module="portfolio">Portfolio</a></li>
+                        <li><a href="#signals" class="nav-link" data-module="signals">Trading Signals</a></li>
                     </ul>
                 </div>
                 
                 <div class="nav-section">
                     <h3><i class="fas fa-robot"></i> AI Systems</h3>
                     <ul>
-                        <li><a href="#ml-models" class="nav-link">ML Models</a></li>
-                        <li><a href="#strategies" class="nav-link">Strategies</a></li>
-                        <li><a href="#backtesting" class="nav-link">Backtesting</a></li>
+                        <li><a href="#ml-models" class="nav-link" data-module="ml_models">ML Models</a></li>
+                        <li><a href="#strategies" class="nav-link" data-module="strategies">Strategies</a></li>
+                        <li><a href="#backtesting" class="nav-link" data-module="backtesting">Backtesting</a></li>
                     </ul>
                 </div>
 
                 <div class="nav-section">
                     <h3><i class="fas fa-cogs"></i> Trading</h3>
                     <ul>
-                        <li><a href="#stocks" class="nav-link">Stocks</a></li>
-                        <li><a href="#futures" class="nav-link">Futures</a></li>
-                        <li><a href="#crypto" class="nav-link">Crypto</a></li>
+                        <li><a href="#stocks" class="nav-link" data-module="stocks">Stocks</a></li>
+                        <li><a href="#futures" class="nav-link" data-module="futures">Futures</a></li>
+                        <li><a href="#crypto" class="nav-link" data-module="crypto">Crypto</a></li>
+                    </ul>
+                </div>
+                
+                <div class="nav-section">
+                    <h3><i class="fas fa-sliders-h"></i> Configuration</h3>
+                    <ul>
+                        <li><a href="#settings" class="nav-link">Settings</a></li>
                     </ul>
                 </div>
             </nav>
@@ -452,11 +459,664 @@
                     </div>
                 </div>
 
+                <!-- Stocks Trading Section -->
+                <div id="stocks" class="content-section">
+                    <div class="section-header">
+                        <h2><i class="fas fa-chart-line"></i> Stock Trading</h2>
+                        <div class="section-actions">
+                            <button class="action-btn secondary" id="refresh-stocks-btn">
+                                <i class="fas fa-sync"></i> Refresh Data
+                            </button>
+                        </div>
+                    </div>
+
+                    <div class="trading-layout">
+                        <!-- Trading Form Panel -->
+                        <div class="trading-panel">
+                            <div class="trading-card">
+                                <div class="card-header">
+                                    <h3><i class="fas fa-exchange-alt"></i> Place Order</h3>
+                                    <div class="buying-power">
+                                        <span>Buying Power: <span id="stocks-buying-power">$0.00</span></span>
+                                    </div>
+                                </div>
+                                
+                                <!-- Buy/Sell Toggle -->
+                                <div class="order-side-toggle">
+                                    <button class="side-btn buy active" data-side="buy">
+                                        <i class="fas fa-arrow-up"></i> Buy
+                                    </button>
+                                    <button class="side-btn sell" data-side="sell">
+                                        <i class="fas fa-arrow-down"></i> Sell
+                                    </button>
+                                </div>
+
+                                <form id="stocks-order-form" class="trading-form">
+                                    <!-- Symbol Input with Autocomplete -->
+                                    <div class="form-group">
+                                        <label for="stocks-symbol">Symbol</label>
+                                        <div class="symbol-input-container">
+                                            <input type="text" id="stocks-symbol" placeholder="e.g., AAPL, SPY" autocomplete="off" required>
+                                            <div id="stocks-symbol-dropdown" class="symbol-dropdown"></div>
+                                        </div>
+                                        <div class="symbol-info" id="stocks-symbol-info" style="display: none;">
+                                            <div class="price-info">
+                                                <span class="current-price">$0.00</span>
+                                                <span class="price-change">+$0.00 (+0.00%)</span>
+                                            </div>
+                                            <div class="bid-ask">
+                                                <span>Bid: <span class="bid-price">$0.00</span></span>
+                                                <span>Ask: <span class="ask-price">$0.00</span></span>
+                                            </div>
+                                        </div>
+                                    </div>
+
+                                    <!-- Order Type -->
+                                    <div class="form-group">
+                                        <label for="stocks-order-type">Order Type</label>
+                                        <select id="stocks-order-type" required>
+                                            <option value="market">Market Order</option>
+                                            <option value="limit">Limit Order</option>
+                                            <option value="stop">Stop Order</option>
+                                        </select>
+                                    </div>
+
+                                    <!-- Quantity -->
+                                    <div class="form-group">
+                                        <label for="stocks-quantity">Quantity</label>
+                                        <input type="number" id="stocks-quantity" min="1" step="1" placeholder="100" required>
+                                        <div class="quantity-buttons">
+                                            <button type="button" class="qty-btn" data-qty="10">10</button>
+                                            <button type="button" class="qty-btn" data-qty="50">50</button>
+                                            <button type="button" class="qty-btn" data-qty="100">100</button>
+                                        </div>
+                                    </div>
+
+                                    <!-- Price (for limit orders) -->
+                                    <div class="form-group" id="stocks-price-group" style="display: none;">
+                                        <label for="stocks-price">Limit Price</label>
+                                        <input type="number" id="stocks-price" step="0.01" placeholder="0.00">
+                                    </div>
+
+                                    <!-- Time in Force -->
+                                    <div class="form-group">
+                                        <label for="stocks-tif">Time in Force</label>
+                                        <select id="stocks-tif" required>
+                                            <option value="day">Day</option>
+                                            <option value="gtc">Good Till Canceled (GTC)</option>
+                                            <option value="ioc">Immediate or Cancel (IOC)</option>
+                                            <option value="fok">Fill or Kill (FOK)</option>
+                                        </select>
+                                    </div>
+
+                                    <!-- Order Value Calculator -->
+                                    <div class="order-summary">
+                                        <div class="summary-row">
+                                            <span>Estimated Cost:</span>
+                                            <span id="stocks-estimated-cost">$0.00</span>
+                                        </div>
+                                        <div class="summary-row">
+                                            <span>Commission:</span>
+                                            <span id="stocks-commission">$0.00</span>
+                                        </div>
+                                        <div class="summary-row total">
+                                            <span>Total:</span>
+                                            <span id="stocks-total-cost">$0.00</span>
+                                        </div>
+                                    </div>
+
+                                    <!-- Submit Button -->
+                                    <button type="submit" class="submit-btn" id="stocks-submit-btn">
+                                        <i class="fas fa-paper-plane"></i>
+                                        <span class="btn-text">Place Buy Order</span>
+                                    </button>
+                                </form>
+                            </div>
+                        </div>
+
+                        <!-- Market Data & Watchlist Panel -->
+                        <div class="market-panel">
+                            <!-- Watchlist -->
+                            <div class="watchlist-card">
+                                <div class="card-header">
+                                    <h3><i class="fas fa-star"></i> Stock Watchlist</h3>
+                                    <button class="action-btn small" id="add-stock-watchlist-btn">
+                                        <i class="fas fa-plus"></i> Add
+                                    </button>
+                                </div>
+                                <div id="stocks-watchlist-loading" class="loading">
+                                    <i class="fas fa-spinner fa-spin"></i> Loading watchlist...
+                                </div>
+                                <div id="stocks-watchlist-content" style="display: none;">
+                                    <div class="watchlist-items" id="stocks-watchlist-items">
+                                        <!-- Watchlist items will be populated here -->
+                                    </div>
+                                </div>
+                            </div>
+
+                            <!-- Market Movers -->
+                            <div class="market-movers-card">
+                                <div class="card-header">
+                                    <h3><i class="fas fa-fire"></i> Market Movers</h3>
+                                </div>
+                                <div class="market-movers">
+                                    <div class="mover-section">
+                                        <h4>Top Gainers</h4>
+                                        <div id="stocks-gainers" class="mover-list">
+                                            <!-- Top gainers will be populated here -->
+                                        </div>
+                                    </div>
+                                    <div class="mover-section">
+                                        <h4>Top Losers</h4>
+                                        <div id="stocks-losers" class="mover-list">
+                                            <!-- Top losers will be populated here -->
+                                        </div>
+                                    </div>
+                                </div>
+                            </div>
+                        </div>
+                    </div>
+
+                    <!-- Order History Section -->
+                    <div class="orders-section">
+                        <div class="section-header">
+                            <h3><i class="fas fa-history"></i> Stock Orders</h3>
+                            <div class="order-filters">
+                                <select id="stocks-status-filter" class="filter-select">
+                                    <option value="">All Orders</option>
+                                    <option value="open">Open</option>
+                                    <option value="filled">Filled</option>
+                                    <option value="cancelled">Cancelled</option>
+                                </select>
+                                <input type="date" id="stocks-date-filter" class="date-filter">
+                            </div>
+                        </div>
+
+                        <div id="stocks-orders-loading" class="loading">
+                            <i class="fas fa-spinner fa-spin"></i> Loading orders...
+                        </div>
+
+                        <div id="stocks-orders-content" style="display: none;">
+                            <div class="table-container">
+                                <table id="stocks-orders-table" class="orders-table">
+                                    <thead>
+                                        <tr>
+                                            <th>Symbol</th>
+                                            <th>Side</th>
+                                            <th>Type</th>
+                                            <th>Quantity</th>
+                                            <th>Price</th>
+                                            <th>Status</th>
+                                            <th>Time</th>
+                                            <th>Actions</th>
+                                        </tr>
+                                    </thead>
+                                    <tbody id="stocks-orders-table-body">
+                                        <!-- Orders will be populated here -->
+                                    </tbody>
+                                </table>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+
+                <!-- Futures Trading Section -->
+                <div id="futures" class="content-section">
+                    <div class="section-header">
+                        <h2><i class="fas fa-chart-bar"></i> Futures Trading</h2>
+                        <div class="section-actions">
+                            <button class="action-btn secondary" id="refresh-futures-btn">
+                                <i class="fas fa-sync"></i> Refresh Data
+                            </button>
+                        </div>
+                    </div>
+
+                    <div class="trading-layout">
+                        <!-- Trading Form Panel -->
+                        <div class="trading-panel">
+                            <div class="trading-card">
+                                <div class="card-header">
+                                    <h3><i class="fas fa-exchange-alt"></i> Place Order</h3>
+                                    <div class="buying-power">
+                                        <span>Buying Power: <span id="futures-buying-power">$0.00</span></span>
+                                    </div>
+                                </div>
+                                
+                                <!-- Buy/Sell Toggle -->
+                                <div class="order-side-toggle">
+                                    <button class="side-btn buy active" data-side="buy">
+                                        <i class="fas fa-arrow-up"></i> Buy
+                                    </button>
+                                    <button class="side-btn sell" data-side="sell">
+                                        <i class="fas fa-arrow-down"></i> Sell
+                                    </button>
+                                </div>
+
+                                <form id="futures-order-form" class="trading-form">
+                                    <!-- Symbol Input -->
+                                    <div class="form-group">
+                                        <label for="futures-symbol">Contract Symbol</label>
+                                        <div class="symbol-input-container">
+                                            <input type="text" id="futures-symbol" placeholder="e.g., ES, NQ, GC" autocomplete="off" required>
+                                            <div id="futures-symbol-dropdown" class="symbol-dropdown"></div>
+                                        </div>
+                                        <div class="symbol-info" id="futures-symbol-info" style="display: none;">
+                                            <div class="price-info">
+                                                <span class="current-price">$0.00</span>
+                                                <span class="price-change">+$0.00 (+0.00%)</span>
+                                            </div>
+                                            <div class="bid-ask">
+                                                <span>Bid: <span class="bid-price">$0.00</span></span>
+                                                <span>Ask: <span class="ask-price">$0.00</span></span>
+                                            </div>
+                                        </div>
+                                    </div>
+
+                                    <!-- Order Type -->
+                                    <div class="form-group">
+                                        <label for="futures-order-type">Order Type</label>
+                                        <select id="futures-order-type" required>
+                                            <option value="market">Market Order</option>
+                                            <option value="limit">Limit Order</option>
+                                            <option value="stop">Stop Order</option>
+                                        </select>
+                                    </div>
+
+                                    <!-- Quantity -->
+                                    <div class="form-group">
+                                        <label for="futures-quantity">Contracts</label>
+                                        <input type="number" id="futures-quantity" min="1" step="1" placeholder="1" required>
+                                        <div class="quantity-buttons">
+                                            <button type="button" class="qty-btn" data-qty="1">1</button>
+                                            <button type="button" class="qty-btn" data-qty="5">5</button>
+                                            <button type="button" class="qty-btn" data-qty="10">10</button>
+                                        </div>
+                                    </div>
+
+                                    <!-- Price (for limit orders) -->
+                                    <div class="form-group" id="futures-price-group" style="display: none;">
+                                        <label for="futures-price">Limit Price</label>
+                                        <input type="number" id="futures-price" step="0.25" placeholder="0.00">
+                                    </div>
+
+                                    <!-- Time in Force -->
+                                    <div class="form-group">
+                                        <label for="futures-tif">Time in Force</label>
+                                        <select id="futures-tif" required>
+                                            <option value="day">Day</option>
+                                            <option value="gtc">Good Till Canceled (GTC)</option>
+                                            <option value="ioc">Immediate or Cancel (IOC)</option>
+                                            <option value="fok">Fill or Kill (FOK)</option>
+                                        </select>
+                                    </div>
+
+                                    <!-- Order Value Calculator -->
+                                    <div class="order-summary">
+                                        <div class="summary-row">
+                                            <span>Estimated Cost:</span>
+                                            <span id="futures-estimated-cost">$0.00</span>
+                                        </div>
+                                        <div class="summary-row">
+                                            <span>Commission:</span>
+                                            <span id="futures-commission">$4.50</span>
+                                        </div>
+                                        <div class="summary-row">
+                                            <span>Initial Margin:</span>
+                                            <span id="futures-margin">$0.00</span>
+                                        </div>
+                                        <div class="summary-row total">
+                                            <span>Total Required:</span>
+                                            <span id="futures-total-cost">$0.00</span>
+                                        </div>
+                                    </div>
+
+                                    <!-- Submit Button -->
+                                    <button type="submit" class="submit-btn" id="futures-submit-btn">
+                                        <i class="fas fa-paper-plane"></i>
+                                        <span class="btn-text">Place Buy Order</span>
+                                    </button>
+                                </form>
+                            </div>
+                        </div>
+
+                        <!-- Market Data & Watchlist Panel -->
+                        <div class="market-panel">
+                            <!-- Watchlist -->
+                            <div class="watchlist-card">
+                                <div class="card-header">
+                                    <h3><i class="fas fa-star"></i> Futures Watchlist</h3>
+                                    <button class="action-btn small" id="add-futures-watchlist-btn">
+                                        <i class="fas fa-plus"></i> Add
+                                    </button>
+                                </div>
+                                <div id="futures-watchlist-loading" class="loading">
+                                    <i class="fas fa-spinner fa-spin"></i> Loading watchlist...
+                                </div>
+                                <div id="futures-watchlist-content" style="display: none;">
+                                    <div class="watchlist-items" id="futures-watchlist-items">
+                                        <!-- Watchlist items will be populated here -->
+                                    </div>
+                                </div>
+                            </div>
+
+                            <!-- Popular Futures -->
+                            <div class="popular-contracts-card">
+                                <div class="card-header">
+                                    <h3><i class="fas fa-fire"></i> Popular Futures</h3>
+                                </div>
+                                <div class="popular-contracts">
+                                    <div class="contract-item" data-symbol="ES">
+                                        <div class="contract-info">
+                                            <span class="symbol">ES</span>
+                                            <span class="name">E-mini S&P 500</span>
+                                        </div>
+                                        <div class="contract-price">
+                                            <span class="price">$0.00</span>
+                                            <span class="change">+0.00%</span>
+                                        </div>
+                                    </div>
+                                    <div class="contract-item" data-symbol="NQ">
+                                        <div class="contract-info">
+                                            <span class="symbol">NQ</span>
+                                            <span class="name">E-mini Nasdaq</span>
+                                        </div>
+                                        <div class="contract-price">
+                                            <span class="price">$0.00</span>
+                                            <span class="change">+0.00%</span>
+                                        </div>
+                                    </div>
+                                    <div class="contract-item" data-symbol="GC">
+                                        <div class="contract-info">
+                                            <span class="symbol">GC</span>
+                                            <span class="name">Gold Future</span>
+                                        </div>
+                                        <div class="contract-price">
+                                            <span class="price">$0.00</span>
+                                            <span class="change">+0.00%</span>
+                                        </div>
+                                    </div>
+                                </div>
+                            </div>
+                        </div>
+                    </div>
+
+                    <!-- Order History Section -->
+                    <div class="orders-section">
+                        <div class="section-header">
+                            <h3><i class="fas fa-history"></i> Futures Orders</h3>
+                            <div class="order-filters">
+                                <select id="futures-status-filter" class="filter-select">
+                                    <option value="">All Orders</option>
+                                    <option value="open">Open</option>
+                                    <option value="filled">Filled</option>
+                                    <option value="cancelled">Cancelled</option>
+                                </select>
+                                <input type="date" id="futures-date-filter" class="date-filter">
+                            </div>
+                        </div>
+
+                        <div id="futures-orders-loading" class="loading">
+                            <i class="fas fa-spinner fa-spin"></i> Loading orders...
+                        </div>
+
+                        <div id="futures-orders-content" style="display: none;">
+                            <div class="table-container">
+                                <table id="futures-orders-table" class="orders-table">
+                                    <thead>
+                                        <tr>
+                                            <th>Contract</th>
+                                            <th>Side</th>
+                                            <th>Type</th>
+                                            <th>Quantity</th>
+                                            <th>Price</th>
+                                            <th>Status</th>
+                                            <th>Time</th>
+                                            <th>Actions</th>
+                                        </tr>
+                                    </thead>
+                                    <tbody id="futures-orders-table-body">
+                                        <!-- Orders will be populated here -->
+                                    </tbody>
+                                </table>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+
+                <!-- Crypto Trading Section -->
+                <div id="crypto" class="content-section">
+                    <div class="section-header">
+                        <h2><i class="fas fa-coins"></i> Crypto Trading</h2>
+                        <div class="section-actions">
+                            <button class="action-btn secondary" id="refresh-crypto-btn">
+                                <i class="fas fa-sync"></i> Refresh Data
+                            </button>
+                        </div>
+                    </div>
+
+                    <div class="trading-layout">
+                        <!-- Trading Form Panel -->
+                        <div class="trading-panel">
+                            <div class="trading-card">
+                                <div class="card-header">
+                                    <h3><i class="fas fa-exchange-alt"></i> Place Order</h3>
+                                    <div class="buying-power">
+                                        <span>Buying Power: <span id="crypto-buying-power">$0.00</span></span>
+                                    </div>
+                                </div>
+                                
+                                <!-- Buy/Sell Toggle -->
+                                <div class="order-side-toggle">
+                                    <button class="side-btn buy active" data-side="buy">
+                                        <i class="fas fa-arrow-up"></i> Buy
+                                    </button>
+                                    <button class="side-btn sell" data-side="sell">
+                                        <i class="fas fa-arrow-down"></i> Sell
+                                    </button>
+                                </div>
+
+                                <form id="crypto-order-form" class="trading-form">
+                                    <!-- Symbol Input -->
+                                    <div class="form-group">
+                                        <label for="crypto-symbol">Crypto Symbol</label>
+                                        <div class="symbol-input-container">
+                                            <input type="text" id="crypto-symbol" placeholder="e.g., BTC-USD, ETH-USD" autocomplete="off" required>
+                                            <div id="crypto-symbol-dropdown" class="symbol-dropdown"></div>
+                                        </div>
+                                        <div class="symbol-info" id="crypto-symbol-info" style="display: none;">
+                                            <div class="price-info">
+                                                <span class="current-price">$0.00</span>
+                                                <span class="price-change">+$0.00 (+0.00%)</span>
+                                            </div>
+                                            <div class="bid-ask">
+                                                <span>Bid: <span class="bid-price">$0.00</span></span>
+                                                <span>Ask: <span class="ask-price">$0.00</span></span>
+                                            </div>
+                                        </div>
+                                    </div>
+
+                                    <!-- Order Type -->
+                                    <div class="form-group">
+                                        <label for="crypto-order-type">Order Type</label>
+                                        <select id="crypto-order-type" required>
+                                            <option value="market">Market Order</option>
+                                            <option value="limit">Limit Order</option>
+                                            <option value="stop">Stop Order</option>
+                                        </select>
+                                    </div>
+
+                                    <!-- Quantity -->
+                                    <div class="form-group">
+                                        <label for="crypto-quantity">Quantity</label>
+                                        <input type="number" id="crypto-quantity" min="0.0001" step="0.0001" placeholder="0.1000" required>
+                                        <div class="quantity-buttons">
+                                            <button type="button" class="qty-btn" data-qty="0.01">0.01</button>
+                                            <button type="button" class="qty-btn" data-qty="0.1">0.1</button>
+                                            <button type="button" class="qty-btn" data-qty="1">1</button>
+                                        </div>
+                                    </div>
+
+                                    <!-- Price (for limit orders) -->
+                                    <div class="form-group" id="crypto-price-group" style="display: none;">
+                                        <label for="crypto-price">Limit Price</label>
+                                        <input type="number" id="crypto-price" step="0.01" placeholder="0.00">
+                                    </div>
+
+                                    <!-- Time in Force -->
+                                    <div class="form-group">
+                                        <label for="crypto-tif">Time in Force</label>
+                                        <select id="crypto-tif" required>
+                                            <option value="day">Day</option>
+                                            <option value="gtc">Good Till Canceled (GTC)</option>
+                                            <option value="ioc">Immediate or Cancel (IOC)</option>
+                                            <option value="fok">Fill or Kill (FOK)</option>
+                                        </select>
+                                    </div>
+
+                                    <!-- Order Value Calculator -->
+                                    <div class="order-summary">
+                                        <div class="summary-row">
+                                            <span>Estimated Cost:</span>
+                                            <span id="crypto-estimated-cost">$0.00</span>
+                                        </div>
+                                        <div class="summary-row">
+                                            <span>Network Fee:</span>
+                                            <span id="crypto-network-fee">$2.50</span>
+                                        </div>
+                                        <div class="summary-row total">
+                                            <span>Total:</span>
+                                            <span id="crypto-total-cost">$0.00</span>
+                                        </div>
+                                    </div>
+
+                                    <!-- Submit Button -->
+                                    <button type="submit" class="submit-btn" id="crypto-submit-btn">
+                                        <i class="fas fa-paper-plane"></i>
+                                        <span class="btn-text">Place Buy Order</span>
+                                    </button>
+                                </form>
+                            </div>
+                        </div>
+
+                        <!-- Market Data & Watchlist Panel -->
+                        <div class="market-panel">
+                            <!-- Watchlist -->
+                            <div class="watchlist-card">
+                                <div class="card-header">
+                                    <h3><i class="fas fa-star"></i> Crypto Watchlist</h3>
+                                    <button class="action-btn small" id="add-crypto-watchlist-btn">
+                                        <i class="fas fa-plus"></i> Add
+                                    </button>
+                                </div>
+                                <div id="crypto-watchlist-loading" class="loading">
+                                    <i class="fas fa-spinner fa-spin"></i> Loading watchlist...
+                                </div>
+                                <div id="crypto-watchlist-content" style="display: none;">
+                                    <div class="watchlist-items" id="crypto-watchlist-items">
+                                        <!-- Watchlist items will be populated here -->
+                                    </div>
+                                </div>
+                            </div>
+
+                            <!-- Top Crypto -->
+                            <div class="top-crypto-card">
+                                <div class="card-header">
+                                    <h3><i class="fas fa-crown"></i> Top Cryptocurrencies</h3>
+                                </div>
+                                <div class="crypto-list">
+                                    <div class="crypto-item" data-symbol="BTC-USD">
+                                        <div class="crypto-info">
+                                            <span class="symbol">BTC</span>
+                                            <span class="name">Bitcoin</span>
+                                        </div>
+                                        <div class="crypto-price">
+                                            <span class="price">$0.00</span>
+                                            <span class="change">+0.00%</span>
+                                        </div>
+                                    </div>
+                                    <div class="crypto-item" data-symbol="ETH-USD">
+                                        <div class="crypto-info">
+                                            <span class="symbol">ETH</span>
+                                            <span class="name">Ethereum</span>
+                                        </div>
+                                        <div class="crypto-price">
+                                            <span class="price">$0.00</span>
+                                            <span class="change">+0.00%</span>
+                                        </div>
+                                    </div>
+                                    <div class="crypto-item" data-symbol="ADA-USD">
+                                        <div class="crypto-info">
+                                            <span class="symbol">ADA</span>
+                                            <span class="name">Cardano</span>
+                                        </div>
+                                        <div class="crypto-price">
+                                            <span class="price">$0.00</span>
+                                            <span class="change">+0.00%</span>
+                                        </div>
+                                    </div>
+                                </div>
+                            </div>
+                        </div>
+                    </div>
+
+                    <!-- Order History Section -->
+                    <div class="orders-section">
+                        <div class="section-header">
+                            <h3><i class="fas fa-history"></i> Crypto Orders</h3>
+                            <div class="order-filters">
+                                <select id="crypto-status-filter" class="filter-select">
+                                    <option value="">All Orders</option>
+                                    <option value="open">Open</option>
+                                    <option value="filled">Filled</option>
+                                    <option value="cancelled">Cancelled</option>
+                                </select>
+                                <input type="date" id="crypto-date-filter" class="date-filter">
+                            </div>
+                        </div>
+
+                        <div id="crypto-orders-loading" class="loading">
+                            <i class="fas fa-spinner fa-spin"></i> Loading orders...
+                        </div>
+
+                        <div id="crypto-orders-content" style="display: none;">
+                            <div class="table-container">
+                                <table id="crypto-orders-table" class="orders-table">
+                                    <thead>
+                                        <tr>
+                                            <th>Symbol</th>
+                                            <th>Side</th>
+                                            <th>Type</th>
+                                            <th>Quantity</th>
+                                            <th>Price</th>
+                                            <th>Status</th>
+                                            <th>Time</th>
+                                            <th>Actions</th>
+                                        </tr>
+                                    </thead>
+                                    <tbody id="crypto-orders-table-body">
+                                        <!-- Orders will be populated here -->
+                                    </tbody>
+                                </table>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+
                 <div id="signals" class="content-section">
                     <div class="section-header">
                         <h2><i class="fas fa-signal"></i> Trading Signals</h2>
                     </div>
                     <p>Real-time trading signals will be displayed here...</p>
+                </div>
+
+                <!-- Settings Section -->
+                <div id="settings" class="content-section">
+                    <div class="section-header">
+                        <h2><i class="fas fa-sliders-h"></i> Settings & Configuration</h2>
+                    </div>
+                    <div id="settings-content">
+                        <!-- Module settings will be loaded here dynamically -->
+                    </div>
                 </div>
             </div>
         </main>

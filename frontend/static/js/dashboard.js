@@ -12,13 +12,20 @@ class TradingDashboard {
         this.backendStatusElement = document.getElementById('backend-status');
         this.apiEndpointElement = document.getElementById('api-endpoint');
         
+        // Module configuration
+        this.moduleConfig = {};
+        this.localModuleOverrides = this.loadLocalModuleOverrides();
+        
         this.init();
     }
 
     async init() {
         console.log('🚀 AlgoTrendy Dashboard initializing...');
         
-        // Set up navigation
+        // Load module configuration first
+        await this.loadModuleConfiguration();
+        
+        // Set up navigation with module awareness
         this.setupNavigation();
         
         // Check backend connection
@@ -33,7 +40,124 @@ class TradingDashboard {
         // Load trading system data when sections are activated
         this.setupTradingDataLoaders();
         
+        // Setup module settings interface
+        this.setupModuleSettings();
+        
         console.log('✅ Dashboard initialized successfully');
+    }
+    
+    async loadModuleConfiguration() {
+        try {
+            console.log('📦 Loading module configuration...');
+            const response = await fetch('/api/config/modules');
+            
+            if (response.ok) {
+                const config = await response.json();
+                this.moduleConfig = config.modules || {};
+                
+                // Apply local overrides from localStorage
+                this.applyLocalModuleOverrides();
+                
+                // Log module status
+                this.logModuleStatus();
+                
+                // Update UI based on module status
+                this.updateUIForModules();
+            } else {
+                console.warn('⚠️ Failed to load module config, using defaults');
+                this.useDefaultModuleConfig();
+            }
+        } catch (error) {
+            console.error('❌ Error loading module configuration:', error);
+            this.useDefaultModuleConfig();
+        }
+    }
+    
+    useDefaultModuleConfig() {
+        // Default all modules to enabled if backend is unavailable
+        this.moduleConfig = {
+            portfolio: { id: 'portfolio', name: 'Portfolio', enabled: true },
+            trading: { id: 'trading', name: 'Trading', enabled: true },
+            market_data: { id: 'market_data', name: 'Market Data', enabled: true },
+            strategies: { id: 'strategies', name: 'Strategies', enabled: true },
+            backtesting: { id: 'backtesting', name: 'Backtesting', enabled: true },
+            ml_models: { id: 'ml_models', name: 'ML Models', enabled: true },
+            stocks: { id: 'stocks', name: 'Stocks', enabled: true },
+            futures: { id: 'futures', name: 'Futures', enabled: true },
+            crypto: { id: 'crypto', name: 'Crypto', enabled: true },
+            signals: { id: 'signals', name: 'Trading Signals', enabled: true }
+        };
+    }
+    
+    loadLocalModuleOverrides() {
+        const saved = localStorage.getItem('moduleOverrides');
+        return saved ? JSON.parse(saved) : {};
+    }
+    
+    saveLocalModuleOverrides() {
+        localStorage.setItem('moduleOverrides', JSON.stringify(this.localModuleOverrides));
+    }
+    
+    applyLocalModuleOverrides() {
+        // Apply local overrides to module config
+        for (const [moduleId, enabled] of Object.entries(this.localModuleOverrides)) {
+            if (this.moduleConfig[moduleId]) {
+                this.moduleConfig[moduleId].enabled = enabled;
+                console.log(`🔧 Applied local override: ${moduleId} = ${enabled ? 'enabled' : 'disabled'}`);
+            }
+        }
+    }
+    
+    logModuleStatus() {
+        console.log('📊 MODULE STATUS:');
+        console.log('================');
+        
+        for (const [moduleId, config] of Object.entries(this.moduleConfig)) {
+            const status = config.enabled ? '✅ ENABLED' : '❌ DISABLED';
+            console.log(`  ${moduleId}: ${status} - ${config.description || ''}`);
+        }
+        
+        console.log('================');
+        
+        const enabledCount = Object.values(this.moduleConfig).filter(m => m.enabled).length;
+        const totalCount = Object.keys(this.moduleConfig).length;
+        console.log(`📈 ${enabledCount}/${totalCount} modules enabled`);
+    }
+    
+    isModuleEnabled(moduleId) {
+        const module = this.moduleConfig[moduleId];
+        return module && module.enabled && (module.dependenciesMet !== false);
+    }
+    
+    updateUIForModules() {
+        // Update navigation links based on module status
+        const navLinks = document.querySelectorAll('.nav-link[data-module]');
+        
+        navLinks.forEach(link => {
+            const moduleId = link.getAttribute('data-module');
+            if (moduleId && !this.isModuleEnabled(moduleId)) {
+                link.classList.add('module-disabled');
+                link.setAttribute('title', `${this.moduleConfig[moduleId]?.name || moduleId} module is disabled`);
+            }
+        });
+        
+        // Update module status indicators
+        this.updateModuleStatusIndicators();
+    }
+    
+    updateModuleStatusIndicators() {
+        // Update any module status badges or indicators in the UI
+        const indicators = document.querySelectorAll('.module-status-indicator');
+        
+        indicators.forEach(indicator => {
+            const moduleId = indicator.getAttribute('data-module');
+            if (moduleId) {
+                const isEnabled = this.isModuleEnabled(moduleId);
+                indicator.classList.toggle('enabled', isEnabled);
+                indicator.classList.toggle('disabled', !isEnabled);
+                indicator.textContent = isEnabled ? 'Active' : 'Disabled';
+            }
+        });
     }
 
     setupNavigation() {
@@ -45,6 +169,13 @@ class TradingDashboard {
                 e.preventDefault();
                 
                 const targetId = link.getAttribute('href').substring(1);
+                const moduleId = link.getAttribute('data-module');
+                
+                // Check if module is enabled
+                if (moduleId && !this.isModuleEnabled(moduleId)) {
+                    this.showModuleDisabledMessage(moduleId);
+                    return;
+                }
                 
                 // Update active nav link
                 navLinks.forEach(l => l.classList.remove('active'));
@@ -59,24 +190,54 @@ class TradingDashboard {
                 if (targetSection) {
                     targetSection.classList.add('active');
                     
+                    // Handle settings section specially
+                    if (targetId === 'settings') {
+                        this.loadSettingsPanel();
+                        return;
+                    }
+                    
                     // Load data for AI Systems sections and Portfolio
                     switch(targetId) {
                         case 'ml-models':
-                            await this.loadMLModels();
+                            if (this.isModuleEnabled('ml_models')) {
+                                await this.loadMLModels();
+                            }
                             break;
                         case 'strategies':
-                            await this.loadStrategies();
+                            if (this.isModuleEnabled('strategies')) {
+                                await this.loadStrategies();
+                            }
                             break;
                         case 'backtesting':
-                            await this.loadBacktests();
+                            if (this.isModuleEnabled('backtesting')) {
+                                await this.loadBacktests();
+                            }
                             break;
                         case 'portfolio':
-                            await this.loadPortfolioData();
+                            if (this.isModuleEnabled('portfolio')) {
+                                await this.loadPortfolioData();
+                            }
                             break;
                     }
                 }
             });
         });
+    }
+    
+    showModuleDisabledMessage(moduleId) {
+        const module = this.moduleConfig[moduleId];
+        const moduleName = module?.name || moduleId;
+        
+        const message = `
+            <div class="module-disabled-message">
+                <i class="fas fa-lock"></i>
+                <h3>${moduleName} Module Disabled</h3>
+                <p>${module?.description || 'This module is currently disabled.'}</p>
+                <p>To enable this module, go to <a href="#settings" class="settings-link">Settings</a> and toggle the module on.</p>
+            </div>
+        `;
+        
+        this.showMessage(message, 'warning', 5000);
     }
 
     async checkBackendStatus() {
@@ -142,13 +303,27 @@ class TradingDashboard {
                 
                 switch(buttonText) {
                     case 'Start Trading Interface':
-                        this.showMessage('Trading interface would launch here...', 'info');
+                        if (this.isModuleEnabled('trading')) {
+                            this.showMessage('Trading interface would launch here...', 'info');
+                        } else {
+                            this.showModuleDisabledMessage('trading');
+                        }
                         break;
                     case 'View Backtests':
-                        this.showMessage('Backtest results would display here...', 'info');
+                        if (this.isModuleEnabled('backtesting')) {
+                            this.showMessage('Backtest results would display here...', 'info');
+                        } else {
+                            this.showModuleDisabledMessage('backtesting');
+                        }
                         break;
                     case 'System Settings':
-                        this.showMessage('System settings panel would open here...', 'info');
+                        // Navigate to settings section
+                        const settingsLink = document.querySelector('.nav-link[href="#settings"]');
+                        if (settingsLink) {
+                            settingsLink.click();
+                        } else {
+                            this.showMessage('Settings panel would open here...', 'info');
+                        }
                         break;
                     default:
                         this.showMessage(`${buttonText} clicked`, 'info');
@@ -1153,3 +1328,128 @@ window.TradingUtils = {
         }).format(value);
     }
 };
+
+// Module Settings extension for TradingDashboard class
+Object.assign(TradingDashboard.prototype, {
+    setupModuleSettings() {
+        console.log('📋 Module settings interface setup');
+    },
+    
+    loadSettingsPanel() {
+        const settingsContent = document.getElementById('settings-content');
+        if (!settingsContent) {
+            const settingsSection = document.getElementById('settings');
+            if (settingsSection) {
+                settingsSection.innerHTML = '<div id="settings-content"></div>';
+                return this.loadSettingsPanel();
+            }
+            return;
+        }
+        
+        let html = '<div class="module-settings" style="padding: 20px;">';
+        html += '<h3>Module Configuration</h3>';
+        html += '<p style="color: #aaa; margin-bottom: 20px;">Toggle modules on/off to focus on specific features during development.</p>';
+        html += '<div class="module-toggles" style="display: grid; gap: 15px;">';
+        
+        for (const [moduleId, config] of Object.entries(this.moduleConfig)) {
+            const isEnabled = config.enabled;
+            const hasLocalOverride = this.localModuleOverrides.hasOwnProperty(moduleId);
+            
+            html += `
+                <div class="module-toggle-item" style="display: flex; justify-content: space-between; align-items: center; padding: 15px; background: rgba(255,255,255,0.05); border-radius: 8px;">
+                    <div class="module-info" style="flex: 1;">
+                        <h4 style="margin: 0 0 5px 0; color: #fff;">${config.name || moduleId}</h4>
+                        <p style="margin: 0; color: #aaa; font-size: 14px;">${config.description || ''}</p>
+                        ${config.dependencies?.length ? `<small style="color: #888;">Dependencies: ${config.dependencies.join(', ')}</small>` : ''}
+                        ${hasLocalOverride ? '<span style="background: #ff6b6b; color: white; padding: 2px 8px; border-radius: 4px; font-size: 11px; margin-left: 10px;">Local Override</span>' : ''}
+                    </div>
+                    <label style="position: relative; display: inline-block; width: 60px; height: 34px;">
+                        <input type="checkbox" 
+                               class="module-toggle" 
+                               data-module="${moduleId}" 
+                               ${isEnabled ? 'checked' : ''}
+                               style="opacity: 0; width: 0; height: 0;">
+                        <span style="position: absolute; cursor: pointer; top: 0; left: 0; right: 0; bottom: 0; background-color: ${isEnabled ? '#4CAF50' : '#ccc'}; transition: .4s; border-radius: 34px;">
+                            <span style="position: absolute; content: ''; height: 26px; width: 26px; left: ${isEnabled ? '30px' : '4px'}; bottom: 4px; background-color: white; transition: .4s; border-radius: 50%;"></span>
+                        </span>
+                    </label>
+                </div>
+            `;
+        }
+        
+        html += '</div>';
+        html += '<div class="settings-actions" style="margin-top: 30px; display: flex; gap: 10px;">';
+        html += '<button class="action-btn primary" id="apply-module-settings" style="padding: 10px 20px;">Apply Changes</button>';
+        html += '<button class="action-btn secondary" id="reset-module-settings" style="padding: 10px 20px;">Reset to Defaults</button>';
+        html += '</div>';
+        html += '</div>';
+        
+        settingsContent.innerHTML = html;
+        this.setupModuleToggleListeners();
+    },
+    
+    setupModuleToggleListeners() {
+        const toggles = document.querySelectorAll('.module-toggle');
+        toggles.forEach(toggle => {
+            toggle.addEventListener('change', (e) => {
+                const moduleId = e.target.getAttribute('data-module');
+                const enabled = e.target.checked;
+                this.localModuleOverrides[moduleId] = enabled;
+                
+                // Update toggle visual
+                const slider = toggle.nextElementSibling;
+                const sliderButton = slider.querySelector('span');
+                slider.style.backgroundColor = enabled ? '#4CAF50' : '#ccc';
+                sliderButton.style.left = enabled ? '30px' : '4px';
+                
+                console.log(`🔄 Module ${moduleId} set to ${enabled ? 'enabled' : 'disabled'}`);
+            });
+        });
+        
+        const applyBtn = document.getElementById('apply-module-settings');
+        if (applyBtn) {
+            applyBtn.addEventListener('click', async () => {
+                await this.applyModuleSettings();
+            });
+        }
+        
+        const resetBtn = document.getElementById('reset-module-settings');
+        if (resetBtn) {
+            resetBtn.addEventListener('click', () => {
+                this.resetModuleSettings();
+            });
+        }
+    },
+    
+    async applyModuleSettings() {
+        this.saveLocalModuleOverrides();
+        
+        for (const [moduleId, enabled] of Object.entries(this.localModuleOverrides)) {
+            if (this.moduleConfig[moduleId] && this.moduleConfig[moduleId].enabled !== enabled) {
+                try {
+                    await fetch(`/api/config/modules/${moduleId}/toggle`, { method: 'POST' });
+                } catch (error) {
+                    console.warn(`Failed to toggle module ${moduleId}:`, error);
+                }
+            }
+        }
+        
+        await this.loadModuleConfiguration();
+        this.showMessage('Module settings applied successfully! Page will refresh...', 'success');
+        
+        // Refresh page after 2 seconds to apply changes
+        setTimeout(() => {
+            window.location.reload();
+        }, 2000);
+    },
+    
+    resetModuleSettings() {
+        this.localModuleOverrides = {};
+        localStorage.removeItem('moduleOverrides');
+        
+        this.loadModuleConfiguration().then(() => {
+            this.loadSettingsPanel();
+            this.showMessage('Module settings reset to defaults', 'info');
+        });
+    }
+});
