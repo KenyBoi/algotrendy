@@ -16,15 +16,31 @@ author = "agent"
 
 [[workflows.workflow.tasks]]
 task = "workflow.run"
-args = "AI Trading API Server"
+args = "Trading Backend API"
+
+[[workflows.workflow.tasks]]
+task = "workflow.run"
+args = "Trading Frontend"
 
 [[workflows.workflow]]
-name = "AI Trading API Server"
+name = "Trading Backend API"
 author = "agent"
 
 [[workflows.workflow.tasks]]
 task = "shell.exec"
-args = "cd src && python -m uvicorn ai_orchestrator_api:app --host 0.0.0.0 --port 5000 --reload"
+args = "cd src && python -m uvicorn ai_orchestrator_api:app --host localhost --port 8000 --reload"
+waitForPort = 8000
+
+[workflows.workflow.metadata]
+outputType = "console"
+
+[[workflows.workflow]]
+name = "Trading Frontend"
+author = "agent"
+
+[[workflows.workflow.tasks]]
+task = "shell.exec"
+args = "cd frontend && python app.py"
 waitForPort = 5000
 
 [workflows.workflow.metadata]
@@ -35,7 +51,7 @@ localPort = 5000
 externalPort = 80
 
 [[ports]]
-localPort = 46215
+localPort = 46119
 externalPort = 3000
 
 [deployment]

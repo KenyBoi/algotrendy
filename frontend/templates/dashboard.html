@@ -1,0 +1,172 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>AlgoTrendy Trading Platform</title>
+    <link rel="stylesheet" href="/static/css/dashboard.css">
+    <link href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.0.0/css/all.min.css" rel="stylesheet">
+</head>
+<body>
+    <div class="dashboard-container">
+        <!-- Header -->
+        <header class="dashboard-header">
+            <div class="header-content">
+                <div class="logo">
+                    <i class="fas fa-chart-line"></i>
+                    <h1>AlgoTrendy</h1>
+                </div>
+                <div class="status-indicator">
+                    <div id="connection-status" class="status-badge">
+                        <i class="fas fa-circle"></i>
+                        <span>Connecting...</span>
+                    </div>
+                </div>
+            </div>
+        </header>
+
+        <!-- Main Content -->
+        <main class="dashboard-main">
+            <!-- Sidebar Navigation -->
+            <nav class="sidebar">
+                <div class="nav-section">
+                    <h3><i class="fas fa-tachometer-alt"></i> Dashboard</h3>
+                    <ul>
+                        <li><a href="#overview" class="nav-link active">Overview</a></li>
+                        <li><a href="#portfolio" class="nav-link">Portfolio</a></li>
+                        <li><a href="#signals" class="nav-link">Trading Signals</a></li>
+                    </ul>
+                </div>
+                
+                <div class="nav-section">
+                    <h3><i class="fas fa-robot"></i> AI Systems</h3>
+                    <ul>
+                        <li><a href="#ml-models" class="nav-link">ML Models</a></li>
+                        <li><a href="#strategies" class="nav-link">Strategies</a></li>
+                        <li><a href="#backtesting" class="nav-link">Backtesting</a></li>
+                    </ul>
+                </div>
+
+                <div class="nav-section">
+                    <h3><i class="fas fa-cogs"></i> Trading</h3>
+                    <ul>
+                        <li><a href="#stocks" class="nav-link">Stocks</a></li>
+                        <li><a href="#futures" class="nav-link">Futures</a></li>
+                        <li><a href="#crypto" class="nav-link">Crypto</a></li>
+                    </ul>
+                </div>
+            </nav>
+
+            <!-- Content Area -->
+            <div class="content-area">
+                <div id="overview" class="content-section active">
+                    <div class="section-header">
+                        <h2><i class="fas fa-chart-area"></i> Platform Overview</h2>
+                    </div>
+                    
+                    <div class="stats-grid">
+                        <div class="stat-card">
+                            <div class="stat-icon">
+                                <i class="fas fa-server"></i>
+                            </div>
+                            <div class="stat-content">
+                                <h3>Backend Status</h3>
+                                <p id="backend-status">Checking...</p>
+                            </div>
+                        </div>
+                        
+                        <div class="stat-card">
+                            <div class="stat-icon">
+                                <i class="fas fa-brain"></i>
+                            </div>
+                            <div class="stat-content">
+                                <h3>AI Systems</h3>
+                                <p>3 Models Active</p>
+                            </div>
+                        </div>
+                        
+                        <div class="stat-card">
+                            <div class="stat-icon">
+                                <i class="fas fa-chart-line"></i>
+                            </div>
+                            <div class="stat-content">
+                                <h3>Trading Systems</h3>
+                                <p>12 Available</p>
+                            </div>
+                        </div>
+                        
+                        <div class="stat-card">
+                            <div class="stat-icon">
+                                <i class="fas fa-shield-alt"></i>
+                            </div>
+                            <div class="stat-content">
+                                <h3>Risk Management</h3>
+                                <p>Active</p>
+                            </div>
+                        </div>
+                    </div>
+
+                    <div class="features-grid">
+                        <div class="feature-card">
+                            <div class="feature-header">
+                                <h3><i class="fas fa-rocket"></i> Quick Actions</h3>
+                            </div>
+                            <div class="action-buttons">
+                                <button class="action-btn primary">
+                                    <i class="fas fa-play"></i>
+                                    Start Trading Interface
+                                </button>
+                                <button class="action-btn secondary">
+                                    <i class="fas fa-chart-bar"></i>
+                                    View Backtests
+                                </button>
+                                <button class="action-btn secondary">
+                                    <i class="fas fa-cog"></i>
+                                    System Settings
+                                </button>
+                            </div>
+                        </div>
+
+                        <div class="feature-card">
+                            <div class="feature-header">
+                                <h3><i class="fas fa-info-circle"></i> System Information</h3>
+                            </div>
+                            <div class="system-info">
+                                <div class="info-item">
+                                    <strong>Platform:</strong> AlgoTrendy v2.0
+                                </div>
+                                <div class="info-item">
+                                    <strong>Environment:</strong> Replit Cloud
+                                </div>
+                                <div class="info-item">
+                                    <strong>Mode:</strong> Development
+                                </div>
+                                <div class="info-item">
+                                    <strong>Backend API:</strong> <span id="api-endpoint">Loading...</span>
+                                </div>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+
+                <!-- Other sections would be added here -->
+                <div id="portfolio" class="content-section">
+                    <div class="section-header">
+                        <h2><i class="fas fa-wallet"></i> Portfolio Management</h2>
+                    </div>
+                    <p>Portfolio management features will be integrated here...</p>
+                </div>
+
+                <div id="signals" class="content-section">
+                    <div class="section-header">
+                        <h2><i class="fas fa-signal"></i> Trading Signals</h2>
+                    </div>
+                    <p>Real-time trading signals will be displayed here...</p>
+                </div>
+            </div>
+        </main>
+    </div>
+
+    <script src="/static/js/dashboard.js"></script>
+</body>
+</html>
