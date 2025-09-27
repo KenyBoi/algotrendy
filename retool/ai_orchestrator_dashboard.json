@@ -1,0 +1,366 @@
+{
+  "name": "AI Orchestrator Dashboard",
+  "description": "Monitor and manage AI providers for AlgoTrendy trading system",
+  "pages": [
+    {
+      "name": "Dashboard Overview",
+      "components": [
+        {
+          "type": "header",
+          "properties": {
+            "title": "🤖 AI Orchestrator Dashboard",
+            "subtitle": "Monitor AI provider performance and manage queries"
+          }
+        },
+        {
+          "type": "stats",
+          "name": "metricsStats",
+          "properties": {
+            "data": "{{ metricsQuery.data }}",
+            "stats": [
+              {
+                "label": "Total Queries",
+                "value": "{{ metricsQuery.data.total_queries }}",
+                "icon": "MessageSquare"
+              },
+              {
+                "label": "Total Cost",
+                "value": "{{ '$' + metricsQuery.data.total_cost.toFixed(2) }}",
+                "icon": "DollarSign"
+              },
+              {
+                "label": "Active Providers",
+                "value": "{{ providersQuery.data.filter(p => p.status === 'healthy').length }}",
+                "icon": "Zap"
+              },
+              {
+                "label": "Avg Response Time",
+                "value": "{{ (providersQuery.data.reduce((sum, p) => sum + p.response_time, 0) / providersQuery.data.length).toFixed(2) + 's' }}",
+                "icon": "Clock"
+              }
+            ]
+          }
+        },
+        {
+          "type": "table",
+          "name": "providersTable",
+          "properties": {
+            "data": "{{ providersQuery.data }}",
+            "columns": [
+              {
+                "name": "Provider",
+                "accessorKey": "provider",
+                "cell": "{{ item.provider.toUpperCase() }}"
+              },
+              {
+                "name": "Status",
+                "accessorKey": "status",
+                "cell": "{{ item.status === 'healthy' ? '🟢 Healthy' : item.status === 'degraded' ? '🟡 Degraded' : '🔴 ' + item.status }}"
+              },
+              {
+                "name": "Response Time",
+                "accessorKey": "response_time",
+                "cell": "{{ item.response_time.toFixed(2) + 's' }}"
+              },
+              {
+                "name": "Success Rate",
+                "accessorKey": "success_rate",
+                "cell": "{{ (item.success_rate * 100).toFixed(1) + '%' }}"
+              },
+              {
+                "name": "Cost/Query",
+                "accessorKey": "cost_per_query",
+                "cell": "{{ '$' + item.cost_per_query.toFixed(4) }}"
+              },
+              {
+                "name": "Consecutive Failures",
+                "accessorKey": "consecutive_failures",
+                "cell": "{{ item.consecutive_failures }}"
+              }
+            ],
+            "actions": [
+              {
+                "type": "button",
+                "text": "Health Check",
+                "onClick": "{{ healthCheckQuery.trigger({ provider_name: item.provider }) }}"
+              }
+            ]
+          }
+        },
+        {
+          "type": "chart",
+          "name": "usageChart",
+          "properties": {
+            "data": "{{ Object.entries(metricsQuery.data.provider_usage || {}).map(([provider, count]) => ({ provider, queries: count })) }}",
+            "chartType": "bar",
+            "xAxis": "provider",
+            "yAxis": "queries",
+            "title": "Provider Usage Distribution"
+          }
+        }
+      ]
+    },
+    {
+      "name": "Query Interface",
+      "components": [
+        {
+          "type": "form",
+          "name": "queryForm",
+          "properties": {
+            "title": "Submit AI Query",
+            "fields": [
+              {
+                "name": "query",
+                "type": "textarea",
+                "label": "Query",
+                "placeholder": "Enter your trading question or analysis request...",
+                "required": true
+              },
+              {
+                "name": "query_type",
+                "type": "select",
+                "label": "Query Type",
+                "options": "{{ queryTypesQuery.data.query_types.map(type => ({ label: type, value: type })) }}",
+                "defaultValue": "analysis",
+                "required": true
+              },
+              {
+                "name": "max_cost",
+                "type": "number",
+                "label": "Max Cost ($)",
+                "placeholder": "0.50",
+                "step": "0.01"
+              },
+              {
+                "name": "user_id",
+                "type": "text",
+                "label": "User ID",
+                "placeholder": "Optional user identifier"
+              }
+            ],
+            "submitButtonText": "Submit Query",
+            "onSubmit": "{{ querySubmitQuery.trigger({ body: formData }) }}"
+          }
+        },
+        {
+          "type": "container",
+          "properties": {
+            "hidden": "{{ !querySubmitQuery.data }}",
+            "components": [
+              {
+                "type": "text",
+                "properties": {
+                  "value": "**Query Result:**",
+                  "style": { "fontWeight": "bold" }
+                }
+              },
+              {
+                "type": "text",
+                "properties": {
+                  "value": "{{ querySubmitQuery.data.content }}"
+                }
+              },
+              {
+                "type": "stats",
+                "properties": {
+                  "data": "{{ querySubmitQuery.data }}",
+                  "stats": [
+                    {
+                      "label": "Provider",
+                      "value": "{{ querySubmitQuery.data.provider }}"
+                    },
+                    {
+                      "label": "Confidence",
+                      "value": "{{ (querySubmitQuery.data.confidence * 100).toFixed(1) + '%' }}"
+                    },
+                    {
+                      "label": "Cost",
+                      "value": "{{ '$' + querySubmitQuery.data.cost.toFixed(4) }}"
+                    },
+                    {
+                      "label": "Processing Time",
+                      "value": "{{ querySubmitQuery.data.processing_time.toFixed(2) + 's' }}"
+                    }
+                  ]
+                }
+              }
+            ]
+          }
+        }
+      ]
+    },
+    {
+      "name": "Provider Comparison",
+      "components": [
+        {
+          "type": "form",
+          "name": "comparisonForm",
+          "properties": {
+            "title": "Compare AI Providers",
+            "fields": [
+              {
+                "name": "query",
+                "type": "textarea",
+                "label": "Query",
+                "placeholder": "Enter a question to compare across all AI providers...",
+                "required": true
+              },
+              {
+                "name": "query_type",
+                "type": "select",
+                "label": "Query Type",
+                "options": "{{ queryTypesQuery.data.query_types.map(type => ({ label: type, value: type })) }}",
+                "defaultValue": "analysis",
+                "required": true
+              }
+            ],
+            "submitButtonText": "Compare Providers",
+            "onSubmit": "{{ comparisonQuery.trigger({ body: formData }) }}"
+          }
+        },
+        {
+          "type": "container",
+          "properties": {
+            "hidden": "{{ !comparisonQuery.data }}",
+            "components": [
+              {
+                "type": "text",
+                "properties": {
+                  "value": "**Comparison Results:**",
+                  "style": { "fontWeight": "bold", "fontSize": "18px" }
+                }
+              },
+              {
+                "type": "table",
+                "name": "comparisonTable",
+                "properties": {
+                  "data": "{{ Object.entries(comparisonQuery.data.responses).map(([provider, response]) => ({ provider, ...response })) }}",
+                  "columns": [
+                    {
+                      "name": "Provider",
+                      "accessorKey": "provider",
+                      "cell": "{{ item.provider.toUpperCase() }}"
+                    },
+                    {
+                      "name": "Response",
+                      "accessorKey": "content",
+                      "cell": "{{ item.content.substring(0, 100) + '...' }}"
+                    },
+                    {
+                      "name": "Confidence",
+                      "accessorKey": "confidence",
+                      "cell": "{{ (item.confidence * 100).toFixed(1) + '%' }}"
+                    },
+                    {
+                      "name": "Cost",
+                      "accessorKey": "cost",
+                      "cell": "{{ '$' + item.cost.toFixed(4) }}"
+                    },
+                    {
+                      "name": "Time",
+                      "accessorKey": "processing_time",
+                      "cell": "{{ item.processing_time.toFixed(2) + 's' }}"
+                    }
+                  ]
+                }
+              },
+              {
+                "type": "stats",
+                "properties": {
+                  "data": "{{ comparisonQuery.data }}",
+                  "stats": [
+                    {
+                      "label": "Consensus Score",
+                      "value": "{{ (comparisonQuery.data.consensus_score * 100).toFixed(1) + '%' }}"
+                    },
+                    {
+                      "label": "Best Provider",
+                      "value": "{{ comparisonQuery.data.best_provider }}"
+                    },
+                    {
+                      "label": "Providers Compared",
+                      "value": "{{ Object.keys(comparisonQuery.data.responses).length }}"
+                    }
+                  ]
+                }
+              }
+            ]
+          }
+        }
+      ]
+    }
+  ],
+  "queries": [
+    {
+      "name": "metricsQuery",
+      "type": "rest",
+      "properties": {
+        "method": "GET",
+        "url": "{{ environment.apiUrl }}/metrics",
+        "headers": {
+          "Content-Type": "application/json"
+        }
+      }
+    },
+    {
+      "name": "providersQuery",
+      "type": "rest",
+      "properties": {
+        "method": "GET",
+        "url": "{{ environment.apiUrl }}/providers",
+        "headers": {
+          "Content-Type": "application/json"
+        }
+      }
+    },
+    {
+      "name": "queryTypesQuery",
+      "type": "rest",
+      "properties": {
+        "method": "GET",
+        "url": "{{ environment.apiUrl }}/query-types",
+        "headers": {
+          "Content-Type": "application/json"
+        }
+      }
+    },
+    {
+      "name": "querySubmitQuery",
+      "type": "rest",
+      "properties": {
+        "method": "POST",
+        "url": "{{ environment.apiUrl }}/query",
+        "headers": {
+          "Content-Type": "application/json"
+        },
+        "body": "{{ formData }}"
+      }
+    },
+    {
+      "name": "comparisonQuery",
+      "type": "rest",
+      "properties": {
+        "method": "POST",
+        "url": "{{ environment.apiUrl }}/compare",
+        "headers": {
+          "Content-Type": "application/json"
+        },
+        "body": "{{ formData }}"
+      }
+    },
+    {
+      "name": "healthCheckQuery",
+      "type": "rest",
+      "properties": {
+        "method": "POST",
+        "url": "{{ environment.apiUrl }}/providers/{{ provider_name }}/health-check",
+        "headers": {
+          "Content-Type": "application/json"
+        }
+      }
+    }
+  ],
+  "environment": {
+    "apiUrl": "http://localhost:8000"
+  }
+}
