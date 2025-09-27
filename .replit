@@ -54,6 +54,10 @@ externalPort = 80
 localPort = 8000
 externalPort = 8000
 
+[[ports]]
+localPort = 35457
+externalPort = 3000
+
 [deployment]
 deploymentTarget = "vm"
 run = ["python", "-m", "uvicorn", "ai_orchestrator_api:app", "--host", "0.0.0.0", "--port", "5000"]
