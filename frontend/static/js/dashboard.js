@@ -43,6 +43,9 @@ class TradingDashboard {
         // Setup module settings interface
         this.setupModuleSettings();
         
+        // Initialize charts
+        this.initializeCharts();
+        
         console.log('✅ Dashboard initialized successfully');
     }
     
@@ -1451,5 +1454,1189 @@ Object.assign(TradingDashboard.prototype, {
             this.loadSettingsPanel();
             this.showMessage('Module settings reset to defaults', 'info');
         });
+    },
+
+    // =============================================================================
+    // COMPREHENSIVE CHARTING SYSTEM
+    // =============================================================================
+
+    initializeCharts() {
+        console.log('📊 Initializing charts...');
+        
+        this.charts = {};
+        this.chartConfig = this.getChartConfig();
+        
+        // Initialize charts when sections become active
+        this.setupChartInitializationObserver();
+        
+        // Initialize overview charts immediately since overview is active by default
+        setTimeout(() => {
+            this.initializeOverviewCharts();
+        }, 500);
+        
+        console.log('📈 Chart system initialized');
+    },
+
+    getChartConfig() {
+        return {
+            colors: {
+                primary: '#2563eb',
+                success: '#059669',
+                danger: '#dc2626',
+                warning: '#d97706',
+                secondary: '#64748b',
+                muted: '#94a3b8',
+                chartBlue: '#3b82f6',
+                chartGreen: '#10b981',
+                chartRed: '#ef4444',
+                chartYellow: '#f59e0b',
+                chartPurple: '#8b5cf6',
+                chartGray: '#6b7280'
+            },
+            fonts: {
+                family: '-apple-system, BlinkMacSystemFont, "Segoe UI", "Roboto", sans-serif',
+                size: 11,
+                weight: 500,
+                color: '#475569'
+            },
+            grid: {
+                color: '#e2e8f0',
+                borderWidth: 1
+            },
+            defaultOptions: {
+                responsive: true,
+                maintainAspectRatio: false,
+                interaction: {
+                    intersect: false,
+                    mode: 'index'
+                },
+                plugins: {
+                    legend: {
+                        position: 'bottom',
+                        labels: {
+                            boxWidth: 12,
+                            padding: 15,
+                            font: {
+                                family: '-apple-system, BlinkMacSystemFont, "Segoe UI", "Roboto", sans-serif',
+                                size: 10,
+                                weight: 500
+                            },
+                            color: '#475569',
+                            usePointStyle: true
+                        }
+                    },
+                    tooltip: {
+                        backgroundColor: '#ffffff',
+                        titleColor: '#0f172a',
+                        bodyColor: '#475569',
+                        borderColor: '#cbd5e1',
+                        borderWidth: 2,
+                        cornerRadius: 0,
+                        padding: 12,
+                        displayColors: false,
+                        titleFont: {
+                            size: 11,
+                            weight: 600
+                        },
+                        bodyFont: {
+                            size: 10,
+                            weight: 500,
+                            family: 'SF Mono, Monaco, Inconsolata, Courier New, monospace'
+                        }
+                    }
+                },
+                scales: {
+                    x: {
+                        border: {
+                            color: '#cbd5e1',
+                            width: 2
+                        },
+                        grid: {
+                            color: '#e2e8f0',
+                            drawBorder: true
+                        },
+                        ticks: {
+                            color: '#475569',
+                            font: {
+                                size: 10,
+                                weight: 500,
+                                family: 'SF Mono, Monaco, Inconsolata, Courier New, monospace'
+                            },
+                            padding: 8
+                        }
+                    },
+                    y: {
+                        border: {
+                            color: '#cbd5e1',
+                            width: 2
+                        },
+                        grid: {
+                            color: '#e2e8f0',
+                            drawBorder: true
+                        },
+                        ticks: {
+                            color: '#475569',
+                            font: {
+                                size: 10,
+                                weight: 500,
+                                family: 'SF Mono, Monaco, Inconsolata, Courier New, monospace'
+                            },
+                            padding: 8
+                        }
+                    }
+                }
+            }
+        };
+    },
+
+    setupChartInitializationObserver() {
+        // Observer to initialize charts when sections become visible
+        const observer = new IntersectionObserver((entries) => {
+            entries.forEach(entry => {
+                if (entry.isIntersecting) {
+                    const sectionId = entry.target.id;
+                    this.initializeSectionCharts(sectionId);
+                }
+            });
+        }, { threshold: 0.1 });
+
+        document.querySelectorAll('.content-section').forEach(section => {
+            observer.observe(section);
+        });
+
+        // Also set up navigation listeners to initialize charts when sections are clicked
+        document.querySelectorAll('.nav-link').forEach(link => {
+            link.addEventListener('click', (e) => {
+                const targetSection = e.target.getAttribute('href')?.substring(1);
+                if (targetSection) {
+                    setTimeout(() => {
+                        this.initializeSectionCharts(targetSection);
+                    }, 100);
+                }
+            });
+        });
+    },
+
+    initializeSectionCharts(sectionId) {
+        console.log(`📊 Initializing charts for section: ${sectionId}`);
+        
+        switch (sectionId) {
+            case 'overview':
+                this.initializeOverviewCharts();
+                break;
+            case 'portfolio':
+                this.initializePortfolioCharts();
+                break;
+            case 'ml-models':
+                this.initializeMLCharts();
+                break;
+            case 'strategies':
+                this.initializeStrategyCharts();
+                break;
+            case 'backtesting':
+                this.initializeBacktestCharts();
+                break;
+        }
+    },
+
+    // =============================================================================
+    // OVERVIEW CHARTS
+    // =============================================================================
+
+    initializeOverviewCharts() {
+        this.createOverviewPerformanceChart();
+        this.createOverviewAllocationChart();
+        this.updateOverviewStats();
+    },
+
+    createOverviewPerformanceChart() {
+        const ctx = document.getElementById('overview-performance-chart');
+        if (!ctx || this.charts['overview-performance']) return;
+
+        const data = this.generatePerformanceData(30);
+        
+        this.charts['overview-performance'] = new Chart(ctx, {
+            type: 'line',
+            data: {
+                labels: data.labels,
+                datasets: [{
+                    label: 'Portfolio Value',
+                    data: data.values,
+                    borderColor: this.chartConfig.colors.primary,
+                    backgroundColor: this.chartConfig.colors.primary + '10',
+                    borderWidth: 2,
+                    pointRadius: 0,
+                    pointHoverRadius: 4,
+                    fill: true,
+                    tension: 0.1
+                }]
+            },
+            options: {
+                ...this.chartConfig.defaultOptions,
+                scales: {
+                    ...this.chartConfig.defaultOptions.scales,
+                    y: {
+                        ...this.chartConfig.defaultOptions.scales.y,
+                        ticks: {
+                            ...this.chartConfig.defaultOptions.scales.y.ticks,
+                            callback: function(value) {
+                                return '$' + (value / 1000).toFixed(0) + 'K';
+                            }
+                        }
+                    }
+                }
+            }
+        });
+    },
+
+    createOverviewAllocationChart() {
+        const ctx = document.getElementById('overview-allocation-chart');
+        if (!ctx || this.charts['overview-allocation']) return;
+
+        const data = this.generateAllocationData();
+        
+        this.charts['overview-allocation'] = new Chart(ctx, {
+            type: 'doughnut',
+            data: {
+                labels: data.labels,
+                datasets: [{
+                    data: data.values,
+                    backgroundColor: [
+                        this.chartConfig.colors.chartBlue,
+                        this.chartConfig.colors.chartGreen,
+                        this.chartConfig.colors.chartYellow,
+                        this.chartConfig.colors.chartPurple,
+                        this.chartConfig.colors.chartGray
+                    ],
+                    borderColor: '#ffffff',
+                    borderWidth: 2
+                }]
+            },
+            options: {
+                ...this.chartConfig.defaultOptions,
+                cutout: '60%',
+                plugins: {
+                    ...this.chartConfig.defaultOptions.plugins,
+                    legend: {
+                        ...this.chartConfig.defaultOptions.plugins.legend,
+                        position: 'right'
+                    },
+                    tooltip: {
+                        ...this.chartConfig.defaultOptions.plugins.tooltip,
+                        callbacks: {
+                            label: function(context) {
+                                return context.label + ': ' + context.parsed.toFixed(1) + '%';
+                            }
+                        }
+                    }
+                }
+            }
+        });
+    },
+
+    // =============================================================================
+    // PORTFOLIO CHARTS
+    // =============================================================================
+
+    initializePortfolioCharts() {
+        this.createPortfolioPerformanceChart();
+        this.createPortfolioAllocationChart();
+        this.createPortfolioPnLChart();
+        this.createPortfolioRiskChart();
+    },
+
+    createPortfolioPerformanceChart() {
+        const ctx = document.getElementById('portfolio-performance-chart');
+        if (!ctx || this.charts['portfolio-performance']) return;
+
+        const data = this.generatePerformanceData(90);
+        
+        this.charts['portfolio-performance'] = new Chart(ctx, {
+            type: 'line',
+            data: {
+                labels: data.labels,
+                datasets: [{
+                    label: 'Portfolio Performance',
+                    data: data.values,
+                    borderColor: this.chartConfig.colors.primary,
+                    backgroundColor: this.chartConfig.colors.primary + '20',
+                    borderWidth: 2,
+                    pointRadius: 0,
+                    pointHoverRadius: 4,
+                    fill: true
+                }, {
+                    label: 'Benchmark (S&P 500)',
+                    data: data.benchmark,
+                    borderColor: this.chartConfig.colors.secondary,
+                    backgroundColor: 'transparent',
+                    borderWidth: 1,
+                    pointRadius: 0,
+                    borderDash: [5, 5]
+                }]
+            },
+            options: {
+                ...this.chartConfig.defaultOptions,
+                scales: {
+                    ...this.chartConfig.defaultOptions.scales,
+                    y: {
+                        ...this.chartConfig.defaultOptions.scales.y,
+                        ticks: {
+                            ...this.chartConfig.defaultOptions.scales.y.ticks,
+                            callback: function(value) {
+                                return '$' + (value / 1000).toFixed(0) + 'K';
+                            }
+                        }
+                    }
+                }
+            }
+        });
+    },
+
+    createPortfolioAllocationChart() {
+        const ctx = document.getElementById('portfolio-allocation-chart');
+        if (!ctx || this.charts['portfolio-allocation']) return;
+
+        const data = this.generateDetailedAllocationData();
+        
+        this.charts['portfolio-allocation'] = new Chart(ctx, {
+            type: 'doughnut',
+            data: {
+                labels: data.labels,
+                datasets: [{
+                    data: data.values,
+                    backgroundColor: data.colors,
+                    borderColor: '#ffffff',
+                    borderWidth: 2
+                }]
+            },
+            options: {
+                ...this.chartConfig.defaultOptions,
+                cutout: '65%',
+                plugins: {
+                    ...this.chartConfig.defaultOptions.plugins,
+                    legend: {
+                        ...this.chartConfig.defaultOptions.plugins.legend,
+                        position: 'right'
+                    }
+                }
+            }
+        });
+    },
+
+    createPortfolioPnLChart() {
+        const ctx = document.getElementById('portfolio-pnl-chart');
+        if (!ctx || this.charts['portfolio-pnl']) return;
+
+        const data = this.generatePnLData();
+        
+        this.charts['portfolio-pnl'] = new Chart(ctx, {
+            type: 'bar',
+            data: {
+                labels: data.labels,
+                datasets: [{
+                    label: 'Daily P&L',
+                    data: data.values,
+                    backgroundColor: data.values.map(v => 
+                        v >= 0 ? this.chartConfig.colors.success + '80' : this.chartConfig.colors.danger + '80'
+                    ),
+                    borderColor: data.values.map(v => 
+                        v >= 0 ? this.chartConfig.colors.success : this.chartConfig.colors.danger
+                    ),
+                    borderWidth: 1
+                }]
+            },
+            options: {
+                ...this.chartConfig.defaultOptions,
+                scales: {
+                    ...this.chartConfig.defaultOptions.scales,
+                    y: {
+                        ...this.chartConfig.defaultOptions.scales.y,
+                        ticks: {
+                            ...this.chartConfig.defaultOptions.scales.y.ticks,
+                            callback: function(value) {
+                                return '$' + value.toLocaleString();
+                            }
+                        }
+                    }
+                }
+            }
+        });
+    },
+
+    createPortfolioRiskChart() {
+        const ctx = document.getElementById('portfolio-risk-chart');
+        if (!ctx || this.charts['portfolio-risk']) return;
+
+        const data = this.generateRiskData();
+        
+        this.charts['portfolio-risk'] = new Chart(ctx, {
+            type: 'radar',
+            data: {
+                labels: ['Volatility', 'Correlation', 'Beta', 'Sharpe Ratio', 'Max Drawdown', 'VaR'],
+                datasets: [{
+                    label: 'Current Portfolio',
+                    data: data.current,
+                    borderColor: this.chartConfig.colors.primary,
+                    backgroundColor: this.chartConfig.colors.primary + '20',
+                    borderWidth: 2,
+                    pointBackgroundColor: this.chartConfig.colors.primary,
+                    pointBorderColor: '#ffffff',
+                    pointBorderWidth: 2
+                }, {
+                    label: 'Target Risk Profile',
+                    data: data.target,
+                    borderColor: this.chartConfig.colors.secondary,
+                    backgroundColor: this.chartConfig.colors.secondary + '10',
+                    borderWidth: 1,
+                    borderDash: [5, 5],
+                    pointBackgroundColor: this.chartConfig.colors.secondary,
+                    pointBorderColor: '#ffffff',
+                    pointBorderWidth: 1
+                }]
+            },
+            options: {
+                ...this.chartConfig.defaultOptions,
+                scales: {
+                    r: {
+                        beginAtZero: true,
+                        max: 100,
+                        grid: {
+                            color: this.chartConfig.grid.color
+                        },
+                        angleLines: {
+                            color: this.chartConfig.grid.color
+                        },
+                        pointLabels: {
+                            font: {
+                                size: 10,
+                                weight: 500
+                            },
+                            color: this.chartConfig.fonts.color
+                        },
+                        ticks: {
+                            display: false
+                        }
+                    }
+                }
+            }
+        });
+    },
+
+    // =============================================================================
+    // ML MODEL CHARTS
+    // =============================================================================
+
+    initializeMLCharts() {
+        this.createMLPerformanceChart();
+        this.createMLTrainingChart();
+        this.createMLFeatureImportanceChart();
+    },
+
+    createMLPerformanceChart() {
+        const ctx = document.getElementById('ml-performance-chart');
+        if (!ctx || this.charts['ml-performance']) return;
+
+        const data = this.generateMLPerformanceData();
+        
+        this.charts['ml-performance'] = new Chart(ctx, {
+            type: 'bar',
+            data: {
+                labels: data.labels,
+                datasets: [{
+                    label: 'Accuracy',
+                    data: data.accuracy,
+                    backgroundColor: this.chartConfig.colors.chartBlue + '80',
+                    borderColor: this.chartConfig.colors.chartBlue,
+                    borderWidth: 2
+                }, {
+                    label: 'Precision',
+                    data: data.precision,
+                    backgroundColor: this.chartConfig.colors.chartGreen + '80',
+                    borderColor: this.chartConfig.colors.chartGreen,
+                    borderWidth: 2
+                }, {
+                    label: 'Recall',
+                    data: data.recall,
+                    backgroundColor: this.chartConfig.colors.chartYellow + '80',
+                    borderColor: this.chartConfig.colors.chartYellow,
+                    borderWidth: 2
+                }]
+            },
+            options: {
+                ...this.chartConfig.defaultOptions,
+                scales: {
+                    ...this.chartConfig.defaultOptions.scales,
+                    y: {
+                        ...this.chartConfig.defaultOptions.scales.y,
+                        beginAtZero: true,
+                        max: 100,
+                        ticks: {
+                            ...this.chartConfig.defaultOptions.scales.y.ticks,
+                            callback: function(value) {
+                                return value + '%';
+                            }
+                        }
+                    }
+                }
+            }
+        });
+    },
+
+    createMLTrainingChart() {
+        const ctx = document.getElementById('ml-training-chart');
+        if (!ctx || this.charts['ml-training']) return;
+
+        const data = this.generateTrainingData();
+        
+        this.charts['ml-training'] = new Chart(ctx, {
+            type: 'line',
+            data: {
+                labels: data.epochs,
+                datasets: [{
+                    label: 'Training Loss',
+                    data: data.trainLoss,
+                    borderColor: this.chartConfig.colors.danger,
+                    backgroundColor: 'transparent',
+                    borderWidth: 2,
+                    pointRadius: 2,
+                    yAxisID: 'y'
+                }, {
+                    label: 'Validation Loss',
+                    data: data.valLoss,
+                    borderColor: this.chartConfig.colors.warning,
+                    backgroundColor: 'transparent',
+                    borderWidth: 2,
+                    pointRadius: 2,
+                    borderDash: [3, 3],
+                    yAxisID: 'y'
+                }, {
+                    label: 'Accuracy',
+                    data: data.accuracy,
+                    borderColor: this.chartConfig.colors.success,
+                    backgroundColor: 'transparent',
+                    borderWidth: 2,
+                    pointRadius: 2,
+                    yAxisID: 'y1'
+                }]
+            },
+            options: {
+                ...this.chartConfig.defaultOptions,
+                scales: {
+                    ...this.chartConfig.defaultOptions.scales,
+                    y: {
+                        ...this.chartConfig.defaultOptions.scales.y,
+                        type: 'linear',
+                        display: true,
+                        position: 'left',
+                        title: {
+                            display: true,
+                            text: 'Loss',
+                            font: { size: 10, weight: 600 },
+                            color: this.chartConfig.fonts.color
+                        }
+                    },
+                    y1: {
+                        ...this.chartConfig.defaultOptions.scales.y,
+                        type: 'linear',
+                        display: true,
+                        position: 'right',
+                        title: {
+                            display: true,
+                            text: 'Accuracy (%)',
+                            font: { size: 10, weight: 600 },
+                            color: this.chartConfig.fonts.color
+                        },
+                        grid: {
+                            drawOnChartArea: false,
+                        },
+                        ticks: {
+                            ...this.chartConfig.defaultOptions.scales.y.ticks,
+                            callback: function(value) {
+                                return value + '%';
+                            }
+                        }
+                    }
+                }
+            }
+        });
+    },
+
+    createMLFeatureImportanceChart() {
+        const ctx = document.getElementById('ml-feature-importance-chart');
+        if (!ctx || this.charts['ml-feature-importance']) return;
+
+        const data = this.generateFeatureImportanceData();
+        
+        this.charts['ml-feature-importance'] = new Chart(ctx, {
+            type: 'horizontalBar',
+            data: {
+                labels: data.features,
+                datasets: [{
+                    label: 'Feature Importance',
+                    data: data.importance,
+                    backgroundColor: this.chartConfig.colors.primary + '80',
+                    borderColor: this.chartConfig.colors.primary,
+                    borderWidth: 2
+                }]
+            },
+            options: {
+                ...this.chartConfig.defaultOptions,
+                indexAxis: 'y',
+                scales: {
+                    ...this.chartConfig.defaultOptions.scales,
+                    x: {
+                        ...this.chartConfig.defaultOptions.scales.x,
+                        beginAtZero: true,
+                        ticks: {
+                            ...this.chartConfig.defaultOptions.scales.x.ticks,
+                            callback: function(value) {
+                                return (value * 100).toFixed(1) + '%';
+                            }
+                        }
+                    }
+                }
+            }
+        });
+    },
+
+    // =============================================================================
+    // STRATEGY & BACKTESTING CHARTS
+    // =============================================================================
+
+    initializeStrategyCharts() {
+        this.createStrategyPerformanceChart();
+        this.createStrategyWinLossChart();
+        this.createStrategyRiskReturnChart();
+    },
+
+    createStrategyPerformanceChart() {
+        const ctx = document.getElementById('strategy-performance-chart');
+        if (!ctx || this.charts['strategy-performance']) return;
+
+        const data = this.generateStrategyPerformanceData();
+        
+        this.charts['strategy-performance'] = new Chart(ctx, {
+            type: 'line',
+            data: {
+                labels: data.labels,
+                datasets: data.strategies.map((strategy, index) => ({
+                    label: strategy.name,
+                    data: strategy.performance,
+                    borderColor: [
+                        this.chartConfig.colors.primary,
+                        this.chartConfig.colors.success,
+                        this.chartConfig.colors.warning,
+                        this.chartConfig.colors.chartPurple
+                    ][index % 4],
+                    backgroundColor: 'transparent',
+                    borderWidth: 2,
+                    pointRadius: 0,
+                    pointHoverRadius: 4
+                }))
+            },
+            options: {
+                ...this.chartConfig.defaultOptions,
+                scales: {
+                    ...this.chartConfig.defaultOptions.scales,
+                    y: {
+                        ...this.chartConfig.defaultOptions.scales.y,
+                        ticks: {
+                            ...this.chartConfig.defaultOptions.scales.y.ticks,
+                            callback: function(value) {
+                                return value.toFixed(1) + '%';
+                            }
+                        }
+                    }
+                }
+            }
+        });
+    },
+
+    createStrategyWinLossChart() {
+        const ctx = document.getElementById('strategy-winloss-chart');
+        if (!ctx || this.charts['strategy-winloss']) return;
+
+        const data = this.generateWinLossData();
+        
+        this.charts['strategy-winloss'] = new Chart(ctx, {
+            type: 'doughnut',
+            data: {
+                labels: ['Winning Trades', 'Losing Trades'],
+                datasets: [{
+                    data: [data.wins, data.losses],
+                    backgroundColor: [
+                        this.chartConfig.colors.success,
+                        this.chartConfig.colors.danger
+                    ],
+                    borderColor: '#ffffff',
+                    borderWidth: 2
+                }]
+            },
+            options: {
+                ...this.chartConfig.defaultOptions,
+                cutout: '60%',
+                plugins: {
+                    ...this.chartConfig.defaultOptions.plugins,
+                    legend: {
+                        ...this.chartConfig.defaultOptions.plugins.legend,
+                        position: 'bottom'
+                    },
+                    tooltip: {
+                        ...this.chartConfig.defaultOptions.plugins.tooltip,
+                        callbacks: {
+                            label: function(context) {
+                                const percentage = ((context.parsed / (data.wins + data.losses)) * 100).toFixed(1);
+                                return context.label + ': ' + context.parsed + ' (' + percentage + '%)';
+                            }
+                        }
+                    }
+                }
+            }
+        });
+    },
+
+    createStrategyRiskReturnChart() {
+        const ctx = document.getElementById('strategy-risk-return-chart');
+        if (!ctx || this.charts['strategy-risk-return']) return;
+
+        const data = this.generateRiskReturnData();
+        
+        this.charts['strategy-risk-return'] = new Chart(ctx, {
+            type: 'scatter',
+            data: {
+                datasets: [{
+                    label: 'Strategies',
+                    data: data.points,
+                    backgroundColor: this.chartConfig.colors.primary + '80',
+                    borderColor: this.chartConfig.colors.primary,
+                    borderWidth: 2,
+                    pointRadius: 6,
+                    pointHoverRadius: 8
+                }]
+            },
+            options: {
+                ...this.chartConfig.defaultOptions,
+                scales: {
+                    ...this.chartConfig.defaultOptions.scales,
+                    x: {
+                        ...this.chartConfig.defaultOptions.scales.x,
+                        title: {
+                            display: true,
+                            text: 'Risk (Volatility %)',
+                            font: { size: 11, weight: 600 },
+                            color: this.chartConfig.fonts.color
+                        },
+                        ticks: {
+                            ...this.chartConfig.defaultOptions.scales.x.ticks,
+                            callback: function(value) {
+                                return value.toFixed(1) + '%';
+                            }
+                        }
+                    },
+                    y: {
+                        ...this.chartConfig.defaultOptions.scales.y,
+                        title: {
+                            display: true,
+                            text: 'Return (%)',
+                            font: { size: 11, weight: 600 },
+                            color: this.chartConfig.fonts.color
+                        },
+                        ticks: {
+                            ...this.chartConfig.defaultOptions.scales.y.ticks,
+                            callback: function(value) {
+                                return value.toFixed(1) + '%';
+                            }
+                        }
+                    }
+                },
+                plugins: {
+                    ...this.chartConfig.defaultOptions.plugins,
+                    tooltip: {
+                        ...this.chartConfig.defaultOptions.plugins.tooltip,
+                        callbacks: {
+                            label: function(context) {
+                                return `Risk: ${context.parsed.x.toFixed(1)}%, Return: ${context.parsed.y.toFixed(1)}%`;
+                            }
+                        }
+                    }
+                }
+            }
+        });
+    },
+
+    initializeBacktestCharts() {
+        this.createBacktestReturnsChart();
+        this.createBacktestDrawdownChart();
+        this.createBacktestDistributionChart();
+    },
+
+    createBacktestReturnsChart() {
+        const ctx = document.getElementById('backtest-returns-chart');
+        if (!ctx || this.charts['backtest-returns']) return;
+
+        const data = this.generateBacktestReturnsData();
+        
+        this.charts['backtest-returns'] = new Chart(ctx, {
+            type: 'line',
+            data: {
+                labels: data.labels,
+                datasets: [{
+                    label: 'Cumulative Returns',
+                    data: data.returns,
+                    borderColor: this.chartConfig.colors.primary,
+                    backgroundColor: this.chartConfig.colors.primary + '20',
+                    borderWidth: 2,
+                    pointRadius: 0,
+                    fill: true
+                }]
+            },
+            options: {
+                ...this.chartConfig.defaultOptions,
+                scales: {
+                    ...this.chartConfig.defaultOptions.scales,
+                    y: {
+                        ...this.chartConfig.defaultOptions.scales.y,
+                        ticks: {
+                            ...this.chartConfig.defaultOptions.scales.y.ticks,
+                            callback: function(value) {
+                                return value.toFixed(1) + '%';
+                            }
+                        }
+                    }
+                }
+            }
+        });
+    },
+
+    createBacktestDrawdownChart() {
+        const ctx = document.getElementById('backtest-drawdown-chart');
+        if (!ctx || this.charts['backtest-drawdown']) return;
+
+        const data = this.generateDrawdownData();
+        
+        this.charts['backtest-drawdown'] = new Chart(ctx, {
+            type: 'line',
+            data: {
+                labels: data.labels,
+                datasets: [{
+                    label: 'Drawdown',
+                    data: data.drawdown,
+                    borderColor: this.chartConfig.colors.danger,
+                    backgroundColor: this.chartConfig.colors.danger + '20',
+                    borderWidth: 2,
+                    pointRadius: 0,
+                    fill: true
+                }]
+            },
+            options: {
+                ...this.chartConfig.defaultOptions,
+                scales: {
+                    ...this.chartConfig.defaultOptions.scales,
+                    y: {
+                        ...this.chartConfig.defaultOptions.scales.y,
+                        max: 0,
+                        ticks: {
+                            ...this.chartConfig.defaultOptions.scales.y.ticks,
+                            callback: function(value) {
+                                return value.toFixed(1) + '%';
+                            }
+                        }
+                    }
+                }
+            }
+        });
+    },
+
+    createBacktestDistributionChart() {
+        const ctx = document.getElementById('backtest-distribution-chart');
+        if (!ctx || this.charts['backtest-distribution']) return;
+
+        const data = this.generateDistributionData();
+        
+        this.charts['backtest-distribution'] = new Chart(ctx, {
+            type: 'bar',
+            data: {
+                labels: data.bins,
+                datasets: [{
+                    label: 'Frequency',
+                    data: data.frequency,
+                    backgroundColor: this.chartConfig.colors.primary + '80',
+                    borderColor: this.chartConfig.colors.primary,
+                    borderWidth: 2
+                }]
+            },
+            options: {
+                ...this.chartConfig.defaultOptions,
+                scales: {
+                    ...this.chartConfig.defaultOptions.scales,
+                    x: {
+                        ...this.chartConfig.defaultOptions.scales.x,
+                        title: {
+                            display: true,
+                            text: 'Monthly Returns (%)',
+                            font: { size: 11, weight: 600 },
+                            color: this.chartConfig.fonts.color
+                        }
+                    },
+                    y: {
+                        ...this.chartConfig.defaultOptions.scales.y,
+                        title: {
+                            display: true,
+                            text: 'Frequency',
+                            font: { size: 11, weight: 600 },
+                            color: this.chartConfig.fonts.color
+                        }
+                    }
+                }
+            }
+        });
+    },
+
+    // =============================================================================
+    // DATA GENERATION METHODS
+    // =============================================================================
+
+    generatePerformanceData(days) {
+        const labels = [];
+        const values = [];
+        const benchmark = [];
+        const startDate = new Date();
+        startDate.setDate(startDate.getDate() - days);
+        
+        let currentValue = 100000;
+        let benchmarkValue = 100000;
+        
+        for (let i = 0; i <= days; i++) {
+            const date = new Date(startDate);
+            date.setDate(date.getDate() + i);
+            labels.push(date.toLocaleDateString());
+            
+            // Generate realistic performance data with some volatility
+            const change = (Math.random() - 0.48) * 0.02; // Slight upward bias
+            currentValue *= (1 + change);
+            values.push(Math.round(currentValue));
+            
+            const benchmarkChange = (Math.random() - 0.49) * 0.015;
+            benchmarkValue *= (1 + benchmarkChange);
+            benchmark.push(Math.round(benchmarkValue));
+        }
+        
+        return { labels, values, benchmark };
+    },
+
+    generateAllocationData() {
+        return {
+            labels: ['Stocks', 'Bonds', 'Commodities', 'Crypto', 'Cash'],
+            values: [45.2, 25.8, 12.3, 8.9, 7.8]
+        };
+    },
+
+    generateDetailedAllocationData() {
+        return {
+            labels: ['Technology', 'Healthcare', 'Financial Services', 'Energy', 'Consumer Goods', 'Bonds', 'Commodities', 'Cash'],
+            values: [18.5, 12.7, 14.0, 8.2, 11.8, 25.8, 6.3, 2.7],
+            colors: [
+                this.chartConfig.colors.chartBlue,
+                this.chartConfig.colors.chartGreen,
+                this.chartConfig.colors.primary,
+                this.chartConfig.colors.warning,
+                this.chartConfig.colors.chartPurple,
+                this.chartConfig.colors.secondary,
+                this.chartConfig.colors.chartYellow,
+                this.chartConfig.colors.chartGray
+            ]
+        };
+    },
+
+    generatePnLData() {
+        const labels = [];
+        const values = [];
+        
+        for (let i = 0; i < 30; i++) {
+            const date = new Date();
+            date.setDate(date.getDate() - (29 - i));
+            labels.push(date.toLocaleDateString('en-US', { month: 'short', day: 'numeric' }));
+            
+            // Generate P&L data with some winning and losing days
+            const pnl = (Math.random() - 0.45) * 5000; // Slight positive bias
+            values.push(Math.round(pnl));
+        }
+        
+        return { labels, values };
+    },
+
+    generateRiskData() {
+        return {
+            current: [75, 45, 88, 92, 65, 78],
+            target: [60, 40, 70, 85, 50, 60]
+        };
+    },
+
+    generateMLPerformanceData() {
+        return {
+            labels: ['XGBoost', 'Random Forest', 'LSTM', 'SVM', 'Linear Regression'],
+            accuracy: [87.3, 84.1, 91.2, 79.8, 76.5],
+            precision: [85.7, 82.9, 89.4, 77.2, 74.8],
+            recall: [89.1, 85.6, 93.1, 82.3, 78.9]
+        };
+    },
+
+    generateTrainingData() {
+        const epochs = [];
+        const trainLoss = [];
+        const valLoss = [];
+        const accuracy = [];
+        
+        for (let i = 1; i <= 50; i++) {
+            epochs.push(i);
+            // Decreasing loss with some noise
+            trainLoss.push(Math.max(0.05, 2.5 * Math.exp(-i/15) + Math.random() * 0.1));
+            valLoss.push(Math.max(0.08, 2.7 * Math.exp(-i/18) + Math.random() * 0.15));
+            // Increasing accuracy
+            accuracy.push(Math.min(98, 60 + 35 * (1 - Math.exp(-i/12)) + (Math.random() - 0.5) * 2));
+        }
+        
+        return { epochs, trainLoss, valLoss, accuracy };
+    },
+
+    generateFeatureImportanceData() {
+        return {
+            features: ['Price Momentum', 'Volume', 'RSI', 'MACD', 'Moving Average', 'Volatility', 'Market Cap', 'P/E Ratio'],
+            importance: [0.28, 0.22, 0.15, 0.12, 0.08, 0.07, 0.05, 0.03]
+        };
+    },
+
+    generateStrategyPerformanceData() {
+        const labels = [];
+        const strategies = [
+            { name: 'Momentum Strategy', performance: [] },
+            { name: 'Mean Reversion', performance: [] },
+            { name: 'Pairs Trading', performance: [] },
+            { name: 'ML Enhanced', performance: [] }
+        ];
+        
+        for (let i = 0; i < 12; i++) {
+            const date = new Date();
+            date.setMonth(date.getMonth() - (11 - i));
+            labels.push(date.toLocaleDateString('en-US', { month: 'short', year: '2-digit' }));
+            
+            // Generate cumulative performance for each strategy
+            strategies[0].performance.push(5 + i * 2.5 + Math.random() * 3); // Momentum
+            strategies[1].performance.push(3 + i * 1.8 + Math.random() * 2.5); // Mean reversion
+            strategies[2].performance.push(4 + i * 2.2 + Math.random() * 3.5); // Pairs trading
+            strategies[3].performance.push(6 + i * 3.1 + Math.random() * 4); // ML Enhanced
+        }
+        
+        return { labels, strategies };
+    },
+
+    generateWinLossData() {
+        return {
+            wins: 127,
+            losses: 48
+        };
+    },
+
+    generateRiskReturnData() {
+        const strategies = ['Momentum', 'Mean Reversion', 'Arbitrage', 'ML Enhanced', 'Pairs Trading', 'Trend Following'];
+        const points = strategies.map(() => ({
+            x: Math.random() * 15 + 5, // Risk (5-20%)
+            y: Math.random() * 25 + 5   // Return (5-30%)
+        }));
+        
+        return { points };
+    },
+
+    generateBacktestReturnsData() {
+        const labels = [];
+        const returns = [];
+        let cumulative = 0;
+        
+        for (let i = 0; i < 252; i++) { // Trading days in a year
+            const date = new Date();
+            date.setDate(date.getDate() - (251 - i));
+            if (i % 10 === 0) labels.push(date.toLocaleDateString('en-US', { month: 'short' }));
+            
+            const dailyReturn = (Math.random() - 0.47) * 2; // Slight positive bias
+            cumulative += dailyReturn;
+            if (i % 10 === 0) returns.push(cumulative);
+        }
+        
+        return { labels, returns };
+    },
+
+    generateDrawdownData() {
+        const labels = [];
+        const drawdown = [];
+        let peak = 0;
+        let current = 0;
+        
+        for (let i = 0; i < 252; i++) {
+            const date = new Date();
+            date.setDate(date.getDate() - (251 - i));
+            if (i % 10 === 0) labels.push(date.toLocaleDateString('en-US', { month: 'short' }));
+            
+            const dailyReturn = (Math.random() - 0.47) * 2;
+            current += dailyReturn;
+            peak = Math.max(peak, current);
+            
+            if (i % 10 === 0) drawdown.push(current - peak);
+        }
+        
+        return { labels, drawdown };
+    },
+
+    generateDistributionData() {
+        const bins = ['-15%', '-10%', '-5%', '0%', '5%', '10%', '15%', '20%'];
+        const frequency = [2, 5, 12, 18, 22, 15, 8, 3]; // Normal-like distribution
+        
+        return { bins, frequency };
+    },
+
+    updateOverviewStats() {
+        // Update large statistical displays
+        const elements = {
+            'total-pnl': '$47,328',
+            'win-rate': '73%',
+            'active-positions': '12',
+            'risk-score': '2.4',
+            'ai-systems-count': '3 Models Active',
+            'trading-systems-count': '12 Available',
+            'risk-status': 'Active'
+        };
+        
+        Object.entries(elements).forEach(([id, value]) => {
+            const element = document.getElementById(id);
+            if (element) {
+                element.textContent = value;
+            }
+        });
+    },
+
+    // Chart control methods
+    setupChartControls() {
+        document.querySelectorAll('.chart-control-btn').forEach(btn => {
+            btn.addEventListener('click', (e) => {
+                const button = e.target;
+                const container = button.closest('.chart-container');
+                const chartCanvas = container.querySelector('canvas');
+                
+                // Update button states
+                container.querySelectorAll('.chart-control-btn').forEach(b => b.classList.remove('active'));
+                button.classList.add('active');
+                
+                // Update chart data based on selection
+                this.updateChartData(chartCanvas.id, button.dataset);
+            });
+        });
+    },
+
+    updateChartData(chartId, dataset) {
+        const chart = this.charts[chartId.replace('-chart', '')];
+        if (!chart) return;
+        
+        // Implement chart updates based on control selections
+        console.log(`Updating chart ${chartId} with:`, dataset);
+        // This would be expanded to actually update chart data based on the controls
     }
 });

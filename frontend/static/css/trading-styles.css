@@ -1,0 +1,1020 @@
+/* ============================================================================= 
+   TRADING INTERFACE STYLES
+   Professional trading platform styling matching Alpaca/Robinhood interfaces
+   ============================================================================= */
+
+/* Trading Layout */
+.trading-layout {
+    display: grid;
+    grid-template-columns: 1fr 400px;
+    gap: 2rem;
+    margin-top: 2rem;
+}
+
+.trading-panel {
+    flex: 1;
+}
+
+.market-panel {
+    display: flex;
+    flex-direction: column;
+    gap: 1.5rem;
+}
+
+/* Trading Card */
+.trading-card {
+    background: var(--card-bg);
+    border: 1px solid var(--border-color);
+    border-radius: 0.75rem;
+    box-shadow: var(--shadow-sm);
+    overflow: hidden;
+}
+
+.trading-card .card-header {
+    padding: 1.25rem 1.5rem;
+    border-bottom: 1px solid var(--border-color);
+    background: var(--sidebar-bg);
+    display: flex;
+    justify-content: space-between;
+    align-items: center;
+}
+
+.trading-card .card-header h3 {
+    font-size: 1rem;
+    font-weight: 600;
+    color: var(--text-primary);
+    display: flex;
+    align-items: center;
+    gap: 0.5rem;
+    margin: 0;
+}
+
+.buying-power {
+    font-size: 0.875rem;
+    color: var(--text-secondary);
+}
+
+.buying-power span {
+    font-weight: 600;
+    color: var(--success-color);
+}
+
+/* Order Side Toggle */
+.order-side-toggle {
+    display: flex;
+    gap: 0.5rem;
+    padding: 1.5rem 1.5rem 0;
+}
+
+.side-btn {
+    flex: 1;
+    padding: 0.75rem;
+    border: 2px solid var(--border-color);
+    background: var(--card-bg);
+    border-radius: 0.5rem;
+    font-weight: 600;
+    font-size: 0.9rem;
+    cursor: pointer;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    gap: 0.5rem;
+    transition: all 0.2s ease;
+}
+
+.side-btn.buy {
+    color: #22c55e;
+}
+
+.side-btn.sell {
+    color: #ef4444;
+}
+
+.side-btn.buy.active {
+    background: #22c55e;
+    color: white;
+    border-color: #22c55e;
+}
+
+.side-btn.sell.active {
+    background: #ef4444;
+    color: white;
+    border-color: #ef4444;
+}
+
+.side-btn:hover:not(.active) {
+    background: var(--sidebar-bg);
+}
+
+/* Trading Form */
+.trading-form {
+    padding: 1.5rem;
+}
+
+.form-group {
+    margin-bottom: 1.25rem;
+}
+
+.form-group label {
+    display: block;
+    font-size: 0.875rem;
+    font-weight: 500;
+    color: var(--text-secondary);
+    margin-bottom: 0.5rem;
+}
+
+.form-group input,
+.form-group select {
+    width: 100%;
+    padding: 0.75rem;
+    border: 1px solid var(--border-color);
+    border-radius: 0.375rem;
+    font-size: 0.9rem;
+    background: var(--card-bg);
+    color: var(--text-primary);
+    transition: all 0.2s ease;
+}
+
+.form-group input:focus,
+.form-group select:focus {
+    outline: none;
+    border-color: var(--primary-color);
+    box-shadow: 0 0 0 3px rgba(37, 99, 235, 0.1);
+}
+
+/* Symbol Input with Autocomplete */
+.symbol-input-container {
+    position: relative;
+}
+
+.symbol-dropdown {
+    position: absolute;
+    top: 100%;
+    left: 0;
+    right: 0;
+    background: var(--card-bg);
+    border: 1px solid var(--border-color);
+    border-radius: 0.375rem;
+    margin-top: 0.25rem;
+    max-height: 200px;
+    overflow-y: auto;
+    z-index: 100;
+    display: none;
+    box-shadow: var(--shadow-lg);
+}
+
+.symbol-item {
+    padding: 0.75rem;
+    cursor: pointer;
+    display: flex;
+    justify-content: space-between;
+    align-items: center;
+    transition: background 0.2s;
+}
+
+.symbol-item:hover {
+    background: var(--sidebar-bg);
+}
+
+.symbol-code {
+    font-weight: 600;
+    color: var(--text-primary);
+}
+
+.symbol-name {
+    font-size: 0.875rem;
+    color: var(--text-secondary);
+}
+
+/* Symbol Info Display */
+.symbol-info {
+    margin-top: 0.5rem;
+    padding: 0.75rem;
+    background: var(--sidebar-bg);
+    border-radius: 0.375rem;
+    border: 1px solid var(--border-color);
+}
+
+.price-info {
+    display: flex;
+    justify-content: space-between;
+    align-items: center;
+    margin-bottom: 0.5rem;
+}
+
+.current-price {
+    font-size: 1.1rem;
+    font-weight: 600;
+    color: var(--text-primary);
+}
+
+.price-change {
+    font-size: 0.875rem;
+    font-weight: 500;
+}
+
+.price-change.positive {
+    color: #22c55e;
+}
+
+.price-change.negative {
+    color: #ef4444;
+}
+
+.bid-ask {
+    display: flex;
+    justify-content: space-between;
+    font-size: 0.875rem;
+    color: var(--text-secondary);
+}
+
+.bid-price,
+.ask-price {
+    font-weight: 500;
+    color: var(--text-primary);
+}
+
+/* Quantity Buttons */
+.quantity-buttons {
+    display: flex;
+    gap: 0.5rem;
+    margin-top: 0.5rem;
+}
+
+.qty-btn {
+    flex: 1;
+    padding: 0.5rem;
+    border: 1px solid var(--border-color);
+    background: var(--card-bg);
+    border-radius: 0.375rem;
+    font-size: 0.875rem;
+    cursor: pointer;
+    transition: all 0.2s;
+}
+
+.qty-btn:hover {
+    background: var(--primary-color);
+    color: white;
+    border-color: var(--primary-color);
+}
+
+/* Order Summary */
+.order-summary {
+    margin-top: 1.5rem;
+    padding: 1rem;
+    background: var(--sidebar-bg);
+    border-radius: 0.375rem;
+    border: 1px solid var(--border-color);
+}
+
+.summary-row {
+    display: flex;
+    justify-content: space-between;
+    align-items: center;
+    padding: 0.5rem 0;
+    font-size: 0.875rem;
+    color: var(--text-secondary);
+}
+
+.summary-row span:last-child {
+    font-weight: 600;
+    color: var(--text-primary);
+}
+
+.summary-row.total {
+    border-top: 1px solid var(--border-color);
+    padding-top: 0.75rem;
+    font-size: 1rem;
+}
+
+.summary-row.total span {
+    font-weight: 700;
+    color: var(--text-primary);
+}
+
+/* Submit Button */
+.submit-btn {
+    width: 100%;
+    padding: 0.875rem;
+    margin-top: 1.5rem;
+    border: none;
+    border-radius: 0.5rem;
+    font-size: 1rem;
+    font-weight: 600;
+    cursor: pointer;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    gap: 0.5rem;
+    transition: all 0.2s ease;
+}
+
+.submit-btn.buy-order {
+    background: #22c55e;
+    color: white;
+}
+
+.submit-btn.sell-order {
+    background: #ef4444;
+    color: white;
+}
+
+.submit-btn:hover {
+    transform: translateY(-2px);
+    box-shadow: var(--shadow-md);
+}
+
+.submit-btn:disabled {
+    opacity: 0.5;
+    cursor: not-allowed;
+    transform: none;
+}
+
+/* Watchlist Card */
+.watchlist-card,
+.market-movers-card,
+.popular-contracts-card,
+.top-crypto-card {
+    background: var(--card-bg);
+    border: 1px solid var(--border-color);
+    border-radius: 0.75rem;
+    box-shadow: var(--shadow-sm);
+    overflow: hidden;
+}
+
+.watchlist-card .card-header,
+.market-movers-card .card-header,
+.popular-contracts-card .card-header,
+.top-crypto-card .card-header {
+    padding: 1rem 1.25rem;
+    border-bottom: 1px solid var(--border-color);
+    background: var(--sidebar-bg);
+    display: flex;
+    justify-content: space-between;
+    align-items: center;
+}
+
+.watchlist-card h3,
+.market-movers-card h3,
+.popular-contracts-card h3,
+.top-crypto-card h3 {
+    font-size: 0.9rem;
+    font-weight: 600;
+    color: var(--text-primary);
+    display: flex;
+    align-items: center;
+    gap: 0.5rem;
+    margin: 0;
+}
+
+.action-btn.small {
+    padding: 0.375rem 0.75rem;
+    font-size: 0.75rem;
+    background: var(--primary-color);
+    color: white;
+    border: none;
+    border-radius: 0.375rem;
+    cursor: pointer;
+    display: flex;
+    align-items: center;
+    gap: 0.25rem;
+}
+
+/* Watchlist Items */
+.watchlist-items {
+    padding: 0.5rem;
+}
+
+.watchlist-item {
+    padding: 0.75rem;
+    border-radius: 0.375rem;
+    margin-bottom: 0.5rem;
+    background: var(--sidebar-bg);
+    border: 1px solid var(--border-color);
+    transition: all 0.2s;
+}
+
+.watchlist-item:hover {
+    background: var(--card-bg);
+    border-color: var(--primary-color);
+}
+
+.watchlist-info {
+    display: flex;
+    justify-content: space-between;
+    align-items: center;
+    margin-bottom: 0.5rem;
+}
+
+.watchlist-symbol {
+    font-weight: 600;
+    color: var(--text-primary);
+}
+
+.watchlist-price {
+    font-weight: 500;
+    color: var(--text-primary);
+}
+
+.watchlist-change {
+    font-size: 0.875rem;
+    font-weight: 500;
+}
+
+.watchlist-change.positive {
+    color: #22c55e;
+}
+
+.watchlist-change.negative {
+    color: #ef4444;
+}
+
+.watchlist-actions {
+    display: flex;
+    gap: 0.5rem;
+}
+
+.quick-trade-btn {
+    flex: 1;
+    padding: 0.375rem 0.5rem;
+    border: 1px solid;
+    background: transparent;
+    border-radius: 0.375rem;
+    font-size: 0.75rem;
+    font-weight: 600;
+    cursor: pointer;
+    transition: all 0.2s;
+}
+
+.quick-trade-btn.buy {
+    color: #22c55e;
+    border-color: #22c55e;
+}
+
+.quick-trade-btn.buy:hover {
+    background: #22c55e;
+    color: white;
+}
+
+.quick-trade-btn.sell {
+    color: #ef4444;
+    border-color: #ef4444;
+}
+
+.quick-trade-btn.sell:hover {
+    background: #ef4444;
+    color: white;
+}
+
+.remove-watchlist-btn {
+    padding: 0.375rem 0.5rem;
+    border: none;
+    background: transparent;
+    color: var(--text-muted);
+    cursor: pointer;
+    border-radius: 0.375rem;
+    transition: all 0.2s;
+}
+
+.remove-watchlist-btn:hover {
+    background: rgba(239, 68, 68, 0.1);
+    color: #ef4444;
+}
+
+/* Market Movers */
+.market-movers {
+    padding: 1rem;
+}
+
+.mover-section {
+    margin-bottom: 1rem;
+}
+
+.mover-section h4 {
+    font-size: 0.875rem;
+    font-weight: 600;
+    color: var(--text-secondary);
+    margin-bottom: 0.75rem;
+}
+
+.mover-list {
+    display: flex;
+    flex-direction: column;
+    gap: 0.5rem;
+}
+
+.mover-item {
+    display: flex;
+    justify-content: space-between;
+    align-items: center;
+    padding: 0.5rem;
+    background: var(--sidebar-bg);
+    border-radius: 0.375rem;
+}
+
+.mover-symbol {
+    font-weight: 600;
+    color: var(--text-primary);
+}
+
+.mover-price {
+    color: var(--text-secondary);
+    font-size: 0.875rem;
+}
+
+.mover-change {
+    font-weight: 500;
+    font-size: 0.875rem;
+}
+
+.mover-change.positive {
+    color: #22c55e;
+}
+
+.mover-change.negative {
+    color: #ef4444;
+}
+
+/* Popular Contracts / Top Crypto */
+.popular-contracts,
+.crypto-list {
+    padding: 1rem;
+}
+
+.contract-item,
+.crypto-item {
+    padding: 0.75rem;
+    border-bottom: 1px solid var(--border-color);
+    cursor: pointer;
+    transition: background 0.2s;
+}
+
+.contract-item:hover,
+.crypto-item:hover {
+    background: var(--sidebar-bg);
+}
+
+.contract-item:last-child,
+.crypto-item:last-child {
+    border-bottom: none;
+}
+
+.contract-info,
+.crypto-info {
+    display: flex;
+    gap: 0.75rem;
+    align-items: center;
+    margin-bottom: 0.5rem;
+}
+
+.contract-info .symbol,
+.crypto-info .symbol {
+    font-weight: 700;
+    color: var(--text-primary);
+    font-size: 1rem;
+}
+
+.contract-info .name,
+.crypto-info .name {
+    font-size: 0.875rem;
+    color: var(--text-secondary);
+}
+
+.contract-price,
+.crypto-price {
+    display: flex;
+    justify-content: space-between;
+    align-items: center;
+}
+
+.contract-price .price,
+.crypto-price .price {
+    font-weight: 600;
+    color: var(--text-primary);
+}
+
+.contract-price .change,
+.crypto-price .change {
+    font-size: 0.875rem;
+    font-weight: 500;
+}
+
+.contract-price .change.positive,
+.crypto-price .change.positive {
+    color: #22c55e;
+}
+
+.contract-price .change.negative,
+.crypto-price .change.negative {
+    color: #ef4444;
+}
+
+/* Orders Section */
+.orders-section {
+    margin-top: 2rem;
+}
+
+.orders-section .section-header {
+    display: flex;
+    justify-content: space-between;
+    align-items: center;
+    margin-bottom: 1.5rem;
+}
+
+.orders-section h3 {
+    font-size: 1.1rem;
+    font-weight: 600;
+    color: var(--text-primary);
+    display: flex;
+    align-items: center;
+    gap: 0.5rem;
+}
+
+.order-filters {
+    display: flex;
+    gap: 0.75rem;
+    align-items: center;
+}
+
+.filter-select,
+.date-filter {
+    padding: 0.5rem 0.75rem;
+    border: 1px solid var(--border-color);
+    border-radius: 0.375rem;
+    font-size: 0.875rem;
+    background: var(--card-bg);
+    color: var(--text-primary);
+}
+
+/* Orders Table */
+.orders-table {
+    width: 100%;
+    background: var(--card-bg);
+    border: 1px solid var(--border-color);
+    border-radius: 0.75rem;
+    overflow: hidden;
+}
+
+.orders-table thead {
+    background: var(--sidebar-bg);
+}
+
+.orders-table th {
+    padding: 0.875rem 1rem;
+    text-align: left;
+    font-size: 0.875rem;
+    font-weight: 600;
+    color: var(--text-secondary);
+    border-bottom: 1px solid var(--border-color);
+}
+
+.orders-table td {
+    padding: 0.875rem 1rem;
+    font-size: 0.875rem;
+    color: var(--text-primary);
+    border-bottom: 1px solid var(--border-color);
+}
+
+.orders-table tbody tr:last-child td {
+    border-bottom: none;
+}
+
+.orders-table tbody tr:hover {
+    background: var(--sidebar-bg);
+}
+
+/* Order Status Badges */
+.order-side {
+    padding: 0.25rem 0.5rem;
+    border-radius: 0.25rem;
+    font-size: 0.75rem;
+    font-weight: 600;
+    text-transform: uppercase;
+}
+
+.order-side.buy {
+    background: rgba(34, 197, 94, 0.1);
+    color: #22c55e;
+}
+
+.order-side.sell {
+    background: rgba(239, 68, 68, 0.1);
+    color: #ef4444;
+}
+
+.order-status {
+    padding: 0.25rem 0.5rem;
+    border-radius: 0.25rem;
+    font-size: 0.75rem;
+    font-weight: 600;
+    text-transform: uppercase;
+}
+
+.order-status.filled {
+    background: rgba(34, 197, 94, 0.1);
+    color: #22c55e;
+}
+
+.order-status.pending {
+    background: rgba(251, 191, 36, 0.1);
+    color: #fbbf24;
+}
+
+.order-status.cancelled {
+    background: rgba(107, 114, 128, 0.1);
+    color: #6b7280;
+}
+
+.order-status.rejected {
+    background: rgba(239, 68, 68, 0.1);
+    color: #ef4444;
+}
+
+/* Order Action Buttons */
+.cancel-order-btn,
+.reorder-btn {
+    padding: 0.375rem 0.75rem;
+    border: 1px solid var(--border-color);
+    background: var(--card-bg);
+    border-radius: 0.375rem;
+    font-size: 0.75rem;
+    font-weight: 500;
+    cursor: pointer;
+    transition: all 0.2s;
+}
+
+.cancel-order-btn:hover {
+    background: rgba(239, 68, 68, 0.1);
+    color: #ef4444;
+    border-color: #ef4444;
+}
+
+.reorder-btn:hover {
+    background: var(--primary-color);
+    color: white;
+    border-color: var(--primary-color);
+}
+
+/* Order Confirmation Dialog */
+.order-confirmation {
+    max-width: 400px;
+    padding: 1.5rem;
+}
+
+.order-confirmation h3 {
+    margin-bottom: 1rem;
+    color: var(--text-primary);
+}
+
+.confirmation-details {
+    background: var(--sidebar-bg);
+    padding: 1rem;
+    border-radius: 0.5rem;
+    margin-bottom: 1rem;
+}
+
+.confirmation-details > div {
+    padding: 0.5rem 0;
+    border-bottom: 1px solid var(--border-color);
+}
+
+.confirmation-details > div:last-child {
+    border-bottom: none;
+}
+
+.confirmation-details strong {
+    color: var(--text-secondary);
+}
+
+.confirmation-details .total-cost {
+    margin-top: 0.5rem;
+    padding-top: 1rem;
+    border-top: 2px solid var(--border-color);
+    font-size: 1.1rem;
+}
+
+/* Trading Signals */
+.signals-grid {
+    display: grid;
+    grid-template-columns: repeat(auto-fill, minmax(300px, 1fr));
+    gap: 1.5rem;
+    margin-top: 1.5rem;
+}
+
+.signal-card {
+    background: var(--card-bg);
+    border: 1px solid var(--border-color);
+    border-radius: 0.75rem;
+    padding: 1.25rem;
+    box-shadow: var(--shadow-sm);
+}
+
+.signal-card.buy {
+    border-left: 4px solid #22c55e;
+}
+
+.signal-card.sell {
+    border-left: 4px solid #ef4444;
+}
+
+.signal-card.hold {
+    border-left: 4px solid #fbbf24;
+}
+
+.signal-header {
+    display: flex;
+    justify-content: space-between;
+    align-items: center;
+    margin-bottom: 1rem;
+}
+
+.signal-symbol {
+    font-size: 1.1rem;
+    font-weight: 700;
+    color: var(--text-primary);
+}
+
+.signal-type {
+    padding: 0.375rem 0.75rem;
+    border-radius: 0.375rem;
+    font-size: 0.875rem;
+    font-weight: 600;
+    text-transform: uppercase;
+}
+
+.signal-type.buy {
+    background: rgba(34, 197, 94, 0.1);
+    color: #22c55e;
+}
+
+.signal-type.sell {
+    background: rgba(239, 68, 68, 0.1);
+    color: #ef4444;
+}
+
+.signal-type.hold {
+    background: rgba(251, 191, 36, 0.1);
+    color: #fbbf24;
+}
+
+.signal-details {
+    display: flex;
+    flex-direction: column;
+    gap: 0.5rem;
+}
+
+.signal-price {
+    font-size: 1.25rem;
+    font-weight: 600;
+    color: var(--text-primary);
+}
+
+.signal-strength,
+.signal-reason {
+    font-size: 0.875rem;
+    color: var(--text-secondary);
+}
+
+/* Loading States */
+.loading {
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    padding: 3rem;
+    color: var(--text-secondary);
+}
+
+.loading i {
+    margin-right: 0.75rem;
+    color: var(--primary-color);
+}
+
+/* Error States */
+.error-message {
+    background: rgba(239, 68, 68, 0.05);
+    border: 1px solid rgba(239, 68, 68, 0.2);
+    color: #ef4444;
+    padding: 1rem;
+    border-radius: 0.5rem;
+    margin: 1rem 0;
+}
+
+/* Responsive Design */
+@media (max-width: 1024px) {
+    .trading-layout {
+        grid-template-columns: 1fr;
+    }
+    
+    .market-panel {
+        display: grid;
+        grid-template-columns: 1fr 1fr;
+        gap: 1rem;
+    }
+}
+
+@media (max-width: 768px) {
+    .trading-layout {
+        grid-template-columns: 1fr;
+    }
+    
+    .market-panel {
+        grid-template-columns: 1fr;
+    }
+    
+    .order-side-toggle {
+        flex-direction: column;
+    }
+    
+    .quantity-buttons {
+        flex-direction: column;
+    }
+    
+    .signals-grid {
+        grid-template-columns: 1fr;
+    }
+    
+    .orders-table {
+        overflow-x: auto;
+    }
+    
+    .order-filters {
+        flex-direction: column;
+        width: 100%;
+    }
+    
+    .filter-select,
+    .date-filter {
+        width: 100%;
+    }
+}
+
+/* Dark Theme Adjustments */
+@media (prefers-color-scheme: dark) {
+    .trading-card {
+        background: #1f2937;
+        border-color: #374151;
+    }
+    
+    .form-group input,
+    .form-group select {
+        background: #111827;
+        border-color: #374151;
+        color: #f9fafb;
+    }
+    
+    .symbol-dropdown {
+        background: #1f2937;
+        border-color: #374151;
+    }
+    
+    .symbol-info {
+        background: #111827;
+    }
+    
+    .order-summary {
+        background: #111827;
+    }
+}
+
+/* Animations */
+@keyframes pulse {
+    0% {
+        transform: scale(1);
+    }
+    50% {
+        transform: scale(1.05);
+    }
+    100% {
+        transform: scale(1);
+    }
+}
+
+.submit-btn:not(:disabled):hover {
+    animation: pulse 0.3s ease-in-out;
+}
+
+/* Tooltips */
+.tooltip {
+    position: relative;
+}
+
+.tooltip::after {
+    content: attr(data-tooltip);
+    position: absolute;
+    bottom: 100%;
+    left: 50%;
+    transform: translateX(-50%);
+    padding: 0.5rem;
+    background: #1f2937;
+    color: white;
+    font-size: 0.75rem;
+    border-radius: 0.375rem;
+    white-space: nowrap;
+    opacity: 0;
+    pointer-events: none;
+    transition: opacity 0.2s;
+}
+
+.tooltip:hover::after {
+    opacity: 1;
+}

@@ -71,6 +71,56 @@
                         <h2><i class="fas fa-chart-area"></i> Platform Overview</h2>
                     </div>
                     
+                    <!-- Large Statistical Displays -->
+                    <div class="large-stats-grid">
+                        <div class="large-stat-card">
+                            <div class="large-stat-number" id="total-pnl">$47,328</div>
+                            <div class="large-stat-label">Total P&L</div>
+                            <div class="large-stat-sublabel">Last 30 Days</div>
+                        </div>
+                        <div class="large-stat-card">
+                            <div class="large-stat-number success-color" id="win-rate">73%</div>
+                            <div class="large-stat-label">Win Rate</div>
+                            <div class="large-stat-sublabel">Active Strategies</div>
+                        </div>
+                        <div class="large-stat-card">
+                            <div class="large-stat-number" id="active-positions">12</div>
+                            <div class="large-stat-label">Active Positions</div>
+                            <div class="large-stat-sublabel">Across All Assets</div>
+                        </div>
+                        <div class="large-stat-card">
+                            <div class="large-stat-number warning-color" id="risk-score">2.4</div>
+                            <div class="large-stat-label">Risk Score</div>
+                            <div class="large-stat-sublabel">Current Portfolio</div>
+                        </div>
+                    </div>
+
+                    <!-- Overview Charts -->
+                    <div class="chart-grid">
+                        <div class="chart-container">
+                            <div class="chart-header">
+                                <div class="chart-title">Portfolio Performance (30 Days)</div>
+                                <div class="chart-controls">
+                                    <button class="chart-control-btn active" data-period="7d">7D</button>
+                                    <button class="chart-control-btn" data-period="30d">30D</button>
+                                    <button class="chart-control-btn" data-period="90d">90D</button>
+                                </div>
+                            </div>
+                            <div class="chart-body">
+                                <canvas id="overview-performance-chart" class="chart-canvas"></canvas>
+                            </div>
+                        </div>
+                        <div class="chart-container">
+                            <div class="chart-header">
+                                <div class="chart-title">Asset Allocation</div>
+                            </div>
+                            <div class="chart-body">
+                                <canvas id="overview-allocation-chart" class="chart-canvas"></canvas>
+                            </div>
+                        </div>
+                    </div>
+
+                    <!-- System Status Grid -->
                     <div class="stats-grid">
                         <div id="backend-control-btn" class="stat-card clickable-card">
                             <div class="stat-icon">
@@ -88,7 +138,7 @@
                             </div>
                             <div class="stat-content">
                                 <h3>AI Systems</h3>
-                                <p>3 Models Active</p>
+                                <p id="ai-systems-count">3 Models Active</p>
                             </div>
                         </div>
                         
@@ -98,7 +148,7 @@
                             </div>
                             <div class="stat-content">
                                 <h3>Trading Systems</h3>
-                                <p>12 Available</p>
+                                <p id="trading-systems-count">12 Available</p>
                             </div>
                         </div>
                         
@@ -108,7 +158,7 @@
                             </div>
                             <div class="stat-content">
                                 <h3>Risk Management</h3>
-                                <p>Active</p>
+                                <p id="risk-status">Active</p>
                             </div>
                         </div>
                     </div>
@@ -162,6 +212,41 @@
                         <h2><i class="fas fa-brain"></i> ML Models</h2>
                     </div>
                     
+                    <!-- ML Performance Charts -->
+                    <div class="chart-grid">
+                        <div class="chart-container">
+                            <div class="chart-header">
+                                <div class="chart-title">Model Performance Metrics</div>
+                                <div class="chart-controls">
+                                    <button class="chart-control-btn active" data-metric="accuracy">Accuracy</button>
+                                    <button class="chart-control-btn" data-metric="precision">Precision</button>
+                                    <button class="chart-control-btn" data-metric="recall">Recall</button>
+                                </div>
+                            </div>
+                            <div class="chart-body">
+                                <canvas id="ml-performance-chart" class="chart-canvas"></canvas>
+                            </div>
+                        </div>
+                        <div class="chart-container">
+                            <div class="chart-header">
+                                <div class="chart-title">Training Progress</div>
+                            </div>
+                            <div class="chart-body">
+                                <canvas id="ml-training-chart" class="chart-canvas"></canvas>
+                            </div>
+                        </div>
+                    </div>
+
+                    <!-- Feature Importance Chart -->
+                    <div class="chart-container">
+                        <div class="chart-header">
+                            <div class="chart-title">Feature Importance Analysis</div>
+                        </div>
+                        <div class="chart-body">
+                            <canvas id="ml-feature-importance-chart" class="chart-canvas"></canvas>
+                        </div>
+                    </div>
+                    
                     <div class="loading" id="models-loading">
                         <i class="fas fa-spinner fa-spin"></i> Loading ML models...
                     </div>
@@ -177,6 +262,42 @@
                         <h2><i class="fas fa-chess-knight"></i> Trading Strategies</h2>
                     </div>
                     
+                    <!-- Strategy Performance Charts -->
+                    <div class="chart-grid">
+                        <div class="chart-container">
+                            <div class="chart-header">
+                                <div class="chart-title">Strategy Performance Comparison</div>
+                                <div class="chart-controls">
+                                    <button class="chart-control-btn active" data-period="1m">1M</button>
+                                    <button class="chart-control-btn" data-period="3m">3M</button>
+                                    <button class="chart-control-btn" data-period="6m">6M</button>
+                                    <button class="chart-control-btn" data-period="1y">1Y</button>
+                                </div>
+                            </div>
+                            <div class="chart-body">
+                                <canvas id="strategy-performance-chart" class="chart-canvas"></canvas>
+                            </div>
+                        </div>
+                        <div class="chart-container">
+                            <div class="chart-header">
+                                <div class="chart-title">Win/Loss Ratio</div>
+                            </div>
+                            <div class="chart-body">
+                                <canvas id="strategy-winloss-chart" class="chart-canvas"></canvas>
+                            </div>
+                        </div>
+                    </div>
+
+                    <!-- Risk-Return Analysis -->
+                    <div class="chart-container">
+                        <div class="chart-header">
+                            <div class="chart-title">Risk-Return Scatter Plot</div>
+                        </div>
+                        <div class="chart-body">
+                            <canvas id="strategy-risk-return-chart" class="chart-canvas"></canvas>
+                        </div>
+                    </div>
+                    
                     <div class="loading" id="strategies-loading">
                         <i class="fas fa-spinner fa-spin"></i> Loading strategies...
                     </div>
@@ -190,6 +311,41 @@
                 <div id="backtesting" class="content-section">
                     <div class="section-header">
                         <h2><i class="fas fa-chart-bar"></i> Backtesting Results</h2>
+                    </div>
+                    
+                    <!-- Backtest Performance Charts -->
+                    <div class="chart-grid">
+                        <div class="chart-container">
+                            <div class="chart-header">
+                                <div class="chart-title">Cumulative Returns</div>
+                                <div class="chart-controls">
+                                    <button class="chart-control-btn active" data-strategy="all">All</button>
+                                    <button class="chart-control-btn" data-strategy="momentum">Momentum</button>
+                                    <button class="chart-control-btn" data-strategy="mean-reversion">Mean Rev</button>
+                                </div>
+                            </div>
+                            <div class="chart-body">
+                                <canvas id="backtest-returns-chart" class="chart-canvas"></canvas>
+                            </div>
+                        </div>
+                        <div class="chart-container">
+                            <div class="chart-header">
+                                <div class="chart-title">Drawdown Analysis</div>
+                            </div>
+                            <div class="chart-body">
+                                <canvas id="backtest-drawdown-chart" class="chart-canvas"></canvas>
+                            </div>
+                        </div>
+                    </div>
+
+                    <!-- Statistical Analysis Chart -->
+                    <div class="chart-container">
+                        <div class="chart-header">
+                            <div class="chart-title">Monthly Returns Distribution</div>
+                        </div>
+                        <div class="chart-body">
+                            <canvas id="backtest-distribution-chart" class="chart-canvas"></canvas>
+                        </div>
                     </div>
                     
                     <div class="loading" id="backtests-loading">
@@ -225,6 +381,53 @@
                     </div>
 
                     <div id="portfolio-content" style="display: none;">
+                        <!-- Portfolio Performance Charts -->
+                        <div class="chart-grid">
+                            <div class="chart-container">
+                                <div class="chart-header">
+                                    <div class="chart-title">Portfolio Performance</div>
+                                    <div class="chart-controls">
+                                        <button class="chart-control-btn active" data-period="1d">1D</button>
+                                        <button class="chart-control-btn" data-period="7d">7D</button>
+                                        <button class="chart-control-btn" data-period="30d">30D</button>
+                                        <button class="chart-control-btn" data-period="90d">90D</button>
+                                        <button class="chart-control-btn" data-period="1y">1Y</button>
+                                    </div>
+                                </div>
+                                <div class="chart-body">
+                                    <canvas id="portfolio-performance-chart" class="chart-canvas"></canvas>
+                                </div>
+                            </div>
+                            <div class="chart-container">
+                                <div class="chart-header">
+                                    <div class="chart-title">Asset Allocation</div>
+                                </div>
+                                <div class="chart-body">
+                                    <canvas id="portfolio-allocation-chart" class="chart-canvas"></canvas>
+                                </div>
+                            </div>
+                        </div>
+
+                        <!-- P&L and Risk Charts -->
+                        <div class="chart-grid">
+                            <div class="chart-container">
+                                <div class="chart-header">
+                                    <div class="chart-title">P&L Over Time</div>
+                                </div>
+                                <div class="chart-body">
+                                    <canvas id="portfolio-pnl-chart" class="chart-canvas"></canvas>
+                                </div>
+                            </div>
+                            <div class="chart-container">
+                                <div class="chart-header">
+                                    <div class="chart-title">Risk Metrics</div>
+                                </div>
+                                <div class="chart-body">
+                                    <canvas id="portfolio-risk-chart" class="chart-canvas"></canvas>
+                                </div>
+                            </div>
+                        </div>
+
                         <!-- Portfolio Metrics Grid -->
                         <div class="portfolio-metrics-grid">
                             <div class="portfolio-card account-summary">
@@ -1123,5 +1326,6 @@
     </div>
 
     <script src="/static/js/dashboard.js"></script>
+    <script src="/static/js/trading-module.js"></script>
 </body>
 </html>
