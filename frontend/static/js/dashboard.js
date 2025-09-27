@@ -181,30 +181,29 @@ class TradingDashboard {
 
     updateBackendControlButton() {
         const backendBtn = document.getElementById('backend-control-btn');
-        const backendText = document.getElementById('backend-control-text');
+        const backendStatus = document.getElementById('backend-status');
         
-        if (!backendBtn || !backendText) return;
+        if (!backendBtn || !backendStatus) return;
         
         const isOffline = this.backendStatus === 'backend_unreachable';
         
         if (isOffline) {
-            backendText.textContent = 'Start Backend';
-            backendBtn.className = 'action-btn success';
-            backendBtn.querySelector('i').className = 'fas fa-play';
+            backendStatus.textContent = 'Offline - Click to Start';
+            backendStatus.style.color = 'var(--danger-color)';
         } else {
-            backendText.textContent = 'Stop Backend';
-            backendBtn.className = 'action-btn danger';
-            backendBtn.querySelector('i').className = 'fas fa-stop';
+            backendStatus.textContent = 'Online - Click to Stop';
+            backendStatus.style.color = 'var(--success-color)';
         }
     }
 
     async startBackend() {
         const backendBtn = document.getElementById('backend-control-btn');
-        const backendText = document.getElementById('backend-control-text');
+        const backendStatus = document.getElementById('backend-status');
         
         // Show loading state
-        backendText.textContent = 'Starting...';
-        backendBtn.disabled = true;
+        backendStatus.textContent = 'Starting...';
+        backendStatus.style.color = 'var(--warning-color)';
+        backendBtn.style.pointerEvents = 'none';
         
         try {
             const response = await fetch('/api/backend/start', {
@@ -231,20 +230,22 @@ class TradingDashboard {
             console.error('Failed to start backend:', error);
             this.showMessage('Failed to start backend', 'error');
         } finally {
-            backendBtn.disabled = false;
-            if (backendText.textContent === 'Starting...') {
-                backendText.textContent = 'Start Backend';
+            backendBtn.style.pointerEvents = 'auto';
+            if (backendStatus.textContent === 'Starting...') {
+                backendStatus.textContent = 'Offline - Click to Start';
+                backendStatus.style.color = 'var(--danger-color)';
             }
         }
     }
 
     async stopBackend() {
         const backendBtn = document.getElementById('backend-control-btn');
-        const backendText = document.getElementById('backend-control-text');
+        const backendStatus = document.getElementById('backend-status');
         
         // Show loading state
-        backendText.textContent = 'Stopping...';
-        backendBtn.disabled = true;
+        backendStatus.textContent = 'Stopping...';
+        backendStatus.style.color = 'var(--warning-color)';
+        backendBtn.style.pointerEvents = 'none';
         
         try {
             const response = await fetch('/api/backend/stop', {
@@ -270,9 +271,10 @@ class TradingDashboard {
             console.error('Failed to stop backend:', error);
             this.showMessage('Failed to stop backend', 'error');
         } finally {
-            backendBtn.disabled = false;
-            if (backendText.textContent === 'Stopping...') {
-                backendText.textContent = 'Stop Backend';
+            backendBtn.style.pointerEvents = 'auto';
+            if (backendStatus.textContent === 'Stopping...') {
+                backendStatus.textContent = 'Online - Click to Stop';
+                backendStatus.style.color = 'var(--success-color)';
             }
         }
     }
