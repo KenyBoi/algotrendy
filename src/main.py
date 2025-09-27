@@ -5,6 +5,7 @@ Orchestrates data collection, model training, backtesting, and live trading.
 
 import argparse
 import logging
+import os
 from pathlib import Path
 import pandas as pd
 import numpy as np
