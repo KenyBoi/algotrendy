@@ -201,12 +201,255 @@
                     </div>
                 </div>
 
-                <!-- Other sections -->
+                <!-- Portfolio Section -->
                 <div id="portfolio" class="content-section">
                     <div class="section-header">
                         <h2><i class="fas fa-wallet"></i> Portfolio Management</h2>
+                        <div class="section-actions">
+                            <button class="action-btn secondary" id="refresh-portfolio-btn">
+                                <i class="fas fa-sync"></i> Refresh Data
+                            </button>
+                        </div>
                     </div>
-                    <p>Portfolio management features will be integrated here...</p>
+
+                    <!-- Portfolio Overview Cards -->
+                    <div id="portfolio-loading" class="loading">
+                        <i class="fas fa-spinner fa-spin"></i> Loading portfolio data...
+                    </div>
+
+                    <div id="portfolio-content" style="display: none;">
+                        <!-- Portfolio Metrics Grid -->
+                        <div class="portfolio-metrics-grid">
+                            <div class="portfolio-card account-summary">
+                                <div class="card-header">
+                                    <h3><i class="fas fa-chart-line"></i> Account Summary</h3>
+                                    <span id="portfolio-last-updated" class="last-updated">-</span>
+                                </div>
+                                <div class="metrics-row">
+                                    <div class="metric-item large">
+                                        <span class="metric-label">Total Portfolio Value</span>
+                                        <span id="total-portfolio-value" class="metric-value large">$0.00</span>
+                                    </div>
+                                </div>
+                                <div class="metrics-row">
+                                    <div class="metric-item">
+                                        <span class="metric-label">Cash Balance</span>
+                                        <span id="cash-balance" class="metric-value">$0.00</span>
+                                    </div>
+                                    <div class="metric-item">
+                                        <span class="metric-label">Invested Amount</span>
+                                        <span id="invested-amount" class="metric-value">$0.00</span>
+                                    </div>
+                                </div>
+                            </div>
+
+                            <div class="portfolio-card pnl-summary">
+                                <div class="card-header">
+                                    <h3><i class="fas fa-trending-up"></i> P&L Summary</h3>
+                                </div>
+                                <div class="metrics-row">
+                                    <div class="metric-item">
+                                        <span class="metric-label">Unrealized P&L</span>
+                                        <span id="unrealized-pnl" class="metric-value pnl">$0.00</span>
+                                    </div>
+                                    <div class="metric-item">
+                                        <span class="metric-label">Realized P&L</span>
+                                        <span id="realized-pnl" class="metric-value pnl">$0.00</span>
+                                    </div>
+                                </div>
+                                <div class="metrics-row">
+                                    <div class="metric-item">
+                                        <span class="metric-label">Day Change</span>
+                                        <span id="day-change" class="metric-value pnl">$0.00</span>
+                                    </div>
+                                    <div class="metric-item">
+                                        <span class="metric-label">Day Change %</span>
+                                        <span id="day-change-percent" class="metric-value pnl">0.00%</span>
+                                    </div>
+                                </div>
+                            </div>
+
+                            <div class="portfolio-card risk-metrics">
+                                <div class="card-header">
+                                    <h3><i class="fas fa-shield-alt"></i> Risk Metrics</h3>
+                                </div>
+                                <div class="metrics-row">
+                                    <div class="metric-item">
+                                        <span class="metric-label">Beta</span>
+                                        <span id="portfolio-beta" class="metric-value">-</span>
+                                    </div>
+                                    <div class="metric-item">
+                                        <span class="metric-label">Sharpe Ratio</span>
+                                        <span id="sharpe-ratio" class="metric-value">-</span>
+                                    </div>
+                                </div>
+                                <div class="metrics-row">
+                                    <div class="metric-item">
+                                        <span class="metric-label">Max Drawdown</span>
+                                        <span id="max-drawdown" class="metric-value">-</span>
+                                    </div>
+                                    <div class="metric-item">
+                                        <span class="metric-label">Volatility</span>
+                                        <span id="volatility" class="metric-value">-</span>
+                                    </div>
+                                </div>
+                            </div>
+
+                            <div class="portfolio-card performance-overview">
+                                <div class="card-header">
+                                    <h3><i class="fas fa-chart-area"></i> Performance</h3>
+                                </div>
+                                <div class="performance-periods">
+                                    <div class="period-item">
+                                        <span class="period-label">1D</span>
+                                        <span id="perf-1d" class="period-value pnl">-</span>
+                                    </div>
+                                    <div class="period-item">
+                                        <span class="period-label">1W</span>
+                                        <span id="perf-1w" class="period-value pnl">-</span>
+                                    </div>
+                                    <div class="period-item">
+                                        <span class="period-label">1M</span>
+                                        <span id="perf-1m" class="period-value pnl">-</span>
+                                    </div>
+                                    <div class="period-item">
+                                        <span class="period-label">YTD</span>
+                                        <span id="perf-ytd" class="period-value pnl">-</span>
+                                    </div>
+                                    <div class="period-item">
+                                        <span class="period-label">1Y</span>
+                                        <span id="perf-1y" class="period-value pnl">-</span>
+                                    </div>
+                                </div>
+                            </div>
+                        </div>
+
+                        <!-- Positions Management Section -->
+                        <div class="portfolio-section">
+                            <div class="section-header">
+                                <h3><i class="fas fa-list"></i> Current Positions</h3>
+                                <div class="table-controls">
+                                    <input type="text" id="positions-search" placeholder="Search positions..." class="search-input">
+                                    <select id="positions-filter" class="filter-select">
+                                        <option value="">All Assets</option>
+                                        <option value="equity">Stocks</option>
+                                        <option value="futures">Futures</option>
+                                        <option value="crypto">Crypto</option>
+                                    </select>
+                                </div>
+                            </div>
+
+                            <div id="positions-loading" class="loading">
+                                <i class="fas fa-spinner fa-spin"></i> Loading positions...
+                            </div>
+
+                            <div id="positions-content" style="display: none;">
+                                <div class="positions-summary">
+                                    <span id="positions-count">0 positions</span>
+                                    <span id="positions-total-value">Total: $0.00</span>
+                                </div>
+
+                                <div class="table-container">
+                                    <table id="positions-table" class="positions-table">
+                                        <thead>
+                                            <tr>
+                                                <th class="sortable" data-sort="symbol">
+                                                    Symbol <i class="fas fa-sort"></i>
+                                                </th>
+                                                <th class="sortable" data-sort="name">
+                                                    Name <i class="fas fa-sort"></i>
+                                                </th>
+                                                <th class="sortable" data-sort="asset_type">
+                                                    Type <i class="fas fa-sort"></i>
+                                                </th>
+                                                <th class="sortable numeric" data-sort="quantity">
+                                                    Quantity <i class="fas fa-sort"></i>
+                                                </th>
+                                                <th class="sortable numeric" data-sort="current_price">
+                                                    Price <i class="fas fa-sort"></i>
+                                                </th>
+                                                <th class="sortable numeric" data-sort="market_value">
+                                                    Market Value <i class="fas fa-sort"></i>
+                                                </th>
+                                                <th class="sortable numeric" data-sort="unrealized_pnl">
+                                                    Unrealized P&L <i class="fas fa-sort"></i>
+                                                </th>
+                                                <th class="sortable numeric" data-sort="day_change">
+                                                    Day Change <i class="fas fa-sort"></i>
+                                                </th>
+                                                <th>Actions</th>
+                                            </tr>
+                                        </thead>
+                                        <tbody id="positions-table-body">
+                                            <!-- Positions will be populated here -->
+                                        </tbody>
+                                    </table>
+                                </div>
+                            </div>
+                        </div>
+
+                        <!-- Performance Analytics Section -->
+                        <div class="portfolio-section">
+                            <div class="section-header">
+                                <h3><i class="fas fa-chart-bar"></i> Performance Analytics</h3>
+                                <div class="chart-controls">
+                                    <button class="chart-period-btn active" data-period="30">30D</button>
+                                    <button class="chart-period-btn" data-period="90">90D</button>
+                                    <button class="chart-period-btn" data-period="365">1Y</button>
+                                </div>
+                            </div>
+
+                            <div id="performance-loading" class="loading">
+                                <i class="fas fa-spinner fa-spin"></i> Loading performance data...
+                            </div>
+
+                            <div id="performance-content" style="display: none;">
+                                <div class="performance-metrics-grid">
+                                    <div class="perf-metric-card">
+                                        <div class="metric-label">Total Return</div>
+                                        <div id="total-return" class="metric-value large pnl">-</div>
+                                    </div>
+                                    <div class="perf-metric-card">
+                                        <div class="metric-label">Best Day</div>
+                                        <div id="best-day" class="metric-value positive">-</div>
+                                    </div>
+                                    <div class="perf-metric-card">
+                                        <div class="metric-label">Worst Day</div>
+                                        <div id="worst-day" class="metric-value negative">-</div>
+                                    </div>
+                                    <div class="perf-metric-card">
+                                        <div class="metric-label">Avg Daily Return</div>
+                                        <div id="avg-daily-return" class="metric-value">-</div>
+                                    </div>
+                                </div>
+
+                                <!-- Simple Performance Chart -->
+                                <div class="chart-container">
+                                    <canvas id="performance-chart" width="800" height="300"></canvas>
+                                </div>
+
+                                <!-- Performance Data Table -->
+                                <div class="performance-table-container">
+                                    <h4>Recent Performance History</h4>
+                                    <div class="table-container small">
+                                        <table id="performance-table" class="performance-table">
+                                            <thead>
+                                                <tr>
+                                                    <th>Date</th>
+                                                    <th>Portfolio Value</th>
+                                                    <th>Daily Return</th>
+                                                    <th>Cumulative Return</th>
+                                                </tr>
+                                            </thead>
+                                            <tbody id="performance-table-body">
+                                                <!-- Performance data will be populated here -->
+                                            </tbody>
+                                        </table>
+                                    </div>
+                                </div>
+                            </div>
+                        </div>
+                    </div>
                 </div>
 
                 <div id="signals" class="content-section">
