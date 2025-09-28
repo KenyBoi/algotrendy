@@ -388,13 +388,15 @@ body {
 }
 
 .chart-control-btn {
-    padding: 4px 8px;
+    padding: 3px 6px;
     border: 1px solid var(--border-color);
     background: var(--card-bg);
     color: var(--text-secondary);
-    font-size: 10px;
+    font-size: 8px;
     text-transform: uppercase;
-    font-weight: 500;
+    font-weight: normal;
+    font-family: Arial, Helvetica, sans-serif;
+    letter-spacing: 0.5px;
     cursor: pointer;
 }
 
