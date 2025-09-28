@@ -38,7 +38,7 @@
     --chart-gray: #6b7280;
     
     /* Statistical Display */
-    --stat-large-font: 2.5rem;
+    --stat-large-font: 1.8rem;
     --stat-medium-font: 1.5rem;
     --stat-small-font: 0.875rem;
 }
@@ -334,9 +334,9 @@ body {
 
 .large-stat-number {
     font-size: var(--stat-large-font);
-    font-weight: 700;
+    font-weight: 600;
     color: var(--primary-color);
-    font-family: 'SF Mono', 'Monaco', 'Inconsolata', 'Courier New', monospace;
+    font-family: Arial, Helvetica, sans-serif;
     line-height: 1;
     margin-bottom: 8px;
 }
