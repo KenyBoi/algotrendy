@@ -7,6 +7,7 @@ This file tracks development tasks, their status, and notes for future work.
 | ID | Task | Description | Status | Priority | Owner | Notes |
 |---:|---|---|---|---:|---|---|
 | T-001 | Lazy pandas annotations conversion | Convert remaining `pd.DataFrame` / `pd.Series` type annotations to be import-safe (use `from __future__ import annotations`, `if TYPE_CHECKING`, or `Any` / string annotations). Add a centralized `_get_pd()` helper where helpful. | Tabled | Low | Unassigned | Found during import-hardening work; leave for later as lower priority than QuantConnect and frontend tasks. |
+| T-002 | Flowchart / Architecture diagram | Create and refine architecture flowchart (Mermaid/SVG) showing core components, data flow, and module boundaries. Save editable source and image in `dev/`. | Tabled | Low | Unassigned | User will iterate on the diagram; added initial SVG and source; they made edits locally. |
 
 ---
 
