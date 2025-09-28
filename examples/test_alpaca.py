@@ -8,6 +8,7 @@ import sys
 import json
 import requests
 from datetime import datetime, timedelta
+import pytest
 from dotenv import load_dotenv
 
 # Load environment variables
@@ -18,10 +19,9 @@ def test_alpaca_connection():
     
     api_key = os.getenv('ALPACA_API_KEY')
     secret_key = os.getenv('ALPACA_SECRET_KEY')
-    
+
     if not api_key or not secret_key:
-        print("❌ API credentials not found in .env file")
-        return False
+        pytest.skip("API credentials not found in environment; skipping live Alpaca tests")
     
     # Alpaca paper trading base URL
     base_url = "https://paper-api.alpaca.markets"
@@ -60,58 +60,46 @@ def test_alpaca_connection():
                 headers=data_headers
             )
             
-            if quote_response.status_code == 200:
-                quote_data = quote_response.json()
-                quote = quote_data.get('quote', {})
-                print(f"✅ Market data access confirmed!")
-                print(f"   {symbol} Latest Quote:")
-                print(f"   Bid: ${quote.get('bp', 0):.2f} x {quote.get('bs', 0)}")
-                print(f"   Ask: ${quote.get('ap', 0):.2f} x {quote.get('as', 0)}")
-                
-                # Test 3: Get historical bars
-                print("\n📈 Testing historical data...")
-                
-                end_date = datetime.now().strftime('%Y-%m-%d')
-                start_date = (datetime.now() - timedelta(days=5)).strftime('%Y-%m-%d')
-                
-                bars_response = requests.get(
-                    f"{data_url}/v2/stocks/{symbol}/bars",
-                    headers=data_headers,
-                    params={
-                        'timeframe': '1Day',
-                        'start': start_date,
-                        'end': end_date,
-                        'limit': 5
-                    }
-                )
-                
-                if bars_response.status_code == 200:
-                    bars_data = bars_response.json()
-                    bars = bars_data.get('bars', [])
-                    
-                    if bars:
-                        print(f"✅ Historical data confirmed!")
-                        print(f"   Retrieved {len(bars)} daily bars for {symbol}")
-                        latest_bar = bars[-1]
-                        print(f"   Latest Close: ${latest_bar.get('c', 0):.2f}")
-                        print(f"   Volume: {latest_bar.get('v', 0):,}")
-                    else:
-                        print("⚠️  No historical data returned")
-                else:
-                    print(f"⚠️  Historical data request failed: {bars_response.status_code}")
-            else:
-                print(f"⚠️  Market data request failed: {quote_response.status_code}")
+            assert quote_response.status_code == 200, f"Market data request failed: {quote_response.status_code}"
+            quote_data = quote_response.json()
+            quote = quote_data.get('quote', {})
+            print(f"✅ Market data access confirmed!")
+            print(f"   {symbol} Latest Quote:")
+            print(f"   Bid: ${quote.get('bp', 0):.2f} x {quote.get('bs', 0)}")
+            print(f"   Ask: ${quote.get('ap', 0):.2f} x {quote.get('as', 0)}")
+
+            # Test 3: Get historical bars
+            print("\n📈 Testing historical data...")
+
+            end_date = datetime.now().strftime('%Y-%m-%d')
+            start_date = (datetime.now() - timedelta(days=5)).strftime('%Y-%m-%d')
+
+            bars_response = requests.get(
+                f"{data_url}/v2/stocks/{symbol}/bars",
+                headers=data_headers,
+                params={
+                    'timeframe': '1Day',
+                    'start': start_date,
+                    'end': end_date,
+                    'limit': 5
+                }
+            )
+
+            assert bars_response.status_code == 200, f"Historical data request failed: {bars_response.status_code}"
+            bars_data = bars_response.json()
+            bars = bars_data.get('bars', [])
+            assert bars, "No historical data returned"
+            print(f"✅ Historical data confirmed! Retrieved {len(bars)} daily bars for {symbol}")
+            latest_bar = bars[-1]
+            print(f"   Latest Close: ${latest_bar.get('c', 0):.2f}")
+            print(f"   Volume: {latest_bar.get('v', 0):,}")
             
-            return True
             
         else:
-            print(f"❌ Connection failed: {response.status_code}")
-            print(f"   Response: {response.text}")
-            return False
+            pytest.fail(f"Connection failed: {response.status_code} - {response.text}")
             
     except Exception as e:
-        print(f"❌ Connection error: {e}")
-        return False
+        pytest.fail(f"Connection error: {e}")
 
 def create_simple_alpaca_demo():
     """Create a simple demo using direct REST API calls"""

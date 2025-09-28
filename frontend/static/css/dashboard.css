@@ -1272,4 +1272,11 @@ canvas {
     margin-top: 4px;
     text-transform: uppercase;
     letter-spacing: 0.3px;
+}.card-title {
+    color: #2563eb;
+    font-weight: 600;
+}
+.card-subtitle {
+    color: #64748b;
+    font-size: 0.875rem;
 }

@@ -181,8 +181,13 @@ class TradingDashboard {
                 }
                 
                 // Update active nav link
-                navLinks.forEach(l => l.classList.remove('active'));
+                navLinks.forEach(l => {
+                    l.classList.remove('active');
+                    l.removeAttribute('aria-current');
+                });
                 link.classList.add('active');
+                // Mark the active link for assistive tech
+                link.setAttribute('aria-current', 'page');
                 
                 // Show target content section
                 contentSections.forEach(section => {
@@ -192,6 +197,9 @@ class TradingDashboard {
                 const targetSection = document.getElementById(targetId);
                 if (targetSection) {
                     targetSection.classList.add('active');
+                        // Move focus to the region for keyboard users
+                        targetSection.setAttribute('tabindex', '-1');
+                        targetSection.focus({ preventScroll: true });
                     
                     // Handle settings section specially
                     if (targetId === 'settings') {
@@ -475,6 +483,10 @@ class TradingDashboard {
         console.log('📊 Loading ML models...');
         const loadingEl = document.getElementById('models-loading');
         const contentEl = document.getElementById('models-content');
+
+        // Accessibility: mark region as busy during load
+        if (loadingEl) loadingEl.setAttribute('aria-busy', 'true');
+        if (contentEl) contentEl.setAttribute('aria-hidden', 'true');
         
         try {
             const response = await fetch('/api/trading/models');
@@ -487,12 +499,18 @@ class TradingDashboard {
             this.renderMLModels(data.models);
             this.dataLoaded.models = true;
             
-            loadingEl.style.display = 'none';
-            contentEl.style.display = 'grid';
+            if (loadingEl) {
+                loadingEl.style.display = 'none';
+                loadingEl.removeAttribute('aria-busy');
+            }
+            if (contentEl) {
+                contentEl.style.display = 'grid';
+                contentEl.removeAttribute('aria-hidden');
+            }
             
         } catch (error) {
             console.error('Failed to load ML models:', error);
-            loadingEl.innerHTML = `<div class="error-message">Failed to load ML models: ${error.message}</div>`;
+            if (loadingEl) loadingEl.innerHTML = `<div class="error-message">Failed to load ML models: ${error.message}</div>`;
         }
     }
 
@@ -533,17 +551,18 @@ class TradingDashboard {
         try {
             const response = await fetch('/api/trading/backtests');
             const data = await response.json();
-            
+
             if (data.error) {
                 throw new Error(data.error);
             }
-            
-            this.renderBacktests(data.backtests);
+
+            const backtests = Array.isArray(data?.backtests) ? data.backtests : [];
+            this.renderBacktests(backtests);
             this.dataLoaded.backtests = true;
-            
+
             loadingEl.style.display = 'none';
             contentEl.style.display = 'block';
-            
+
         } catch (error) {
             console.error('Failed to load backtests:', error);
             loadingEl.innerHTML = `<div class="error-message">Failed to load backtests: ${error.message}</div>`;
@@ -640,9 +659,19 @@ class TradingDashboard {
 
     renderBacktests(backtests) {
         const container = document.querySelector('.backtests-grid');
+        if (!container) {
+            return;
+        }
+
+        const items = Array.isArray(backtests) ? backtests : [];
         container.innerHTML = '';
-        
-        backtests.forEach(backtest => {
+
+        if (items.length === 0) {
+            container.innerHTML = '<div class="text-sm text-slate-500">No backtests available.</div>';
+            return;
+        }
+
+        items.forEach(backtest => {
             const backtestCard = document.createElement('div');
             backtestCard.className = 'backtest-card';
             
@@ -825,8 +854,14 @@ class TradingDashboard {
             const loadingEl = document.getElementById('positions-loading');
             const contentEl = document.getElementById('positions-content');
             
-            if (loadingEl) loadingEl.style.display = 'block';
-            if (contentEl) contentEl.style.display = 'none';
+            if (loadingEl) {
+                loadingEl.style.display = 'block';
+                loadingEl.setAttribute('aria-busy', 'true');
+            }
+            if (contentEl) {
+                contentEl.style.display = 'none';
+                contentEl.setAttribute('aria-hidden', 'true');
+            }
 
             const response = await fetch('/api/proxy/positions');
             const data = await response.json();
@@ -847,6 +882,8 @@ class TradingDashboard {
 
             if (loadingEl) loadingEl.style.display = 'none';
             if (contentEl) contentEl.style.display = 'block';
+            if (loadingEl) loadingEl.removeAttribute('aria-busy');
+            if (contentEl) contentEl.removeAttribute('aria-hidden');
             
         } catch (error) {
             console.error('Failed to load positions:', error);
@@ -902,11 +939,11 @@ class TradingDashboard {
                 </td>
                 <td class="actions-cell">
                     <div class="action-buttons">
-                        <button class="action-btn small" onclick="dashboard.viewPositionDetails('${position.symbol}')">
-                            <i class="fas fa-eye"></i>
+                        <button class="action-btn small" type="button" title="View ${position.symbol} details" aria-label="View ${position.symbol} details" onclick="dashboard.viewPositionDetails('${position.symbol}')">
+                            <i class="fas fa-eye" aria-hidden="true"></i>
                         </button>
-                        <button class="action-btn small warning" onclick="dashboard.closePosition('${position.symbol}')">
-                            <i class="fas fa-times"></i>
+                        <button class="action-btn small warning" type="button" title="Close position in ${position.symbol}" aria-label="Close position in ${position.symbol}" onclick="dashboard.closePosition('${position.symbol}')">
+                            <i class="fas fa-times" aria-hidden="true"></i>
                         </button>
                     </div>
                 </td>
@@ -1099,6 +1136,7 @@ class TradingDashboard {
             clearInterval(this.portfolioRefreshInterval);
         }
         
+        // Create a new interval
         this.portfolioRefreshInterval = setInterval(() => {
             // Only refresh if portfolio tab is active
             const portfolioSection = document.getElementById('portfolio');
@@ -1107,6 +1145,28 @@ class TradingDashboard {
                 this.loadPositions();
             }
         }, 30000);
+
+        // Ensure we only add the visibility handler once
+        if (!this.visibilityHandlerAdded) {
+            this.visibilityHandlerAdded = true;
+            this.visibilityHandler = () => {
+                if (document.hidden) {
+                    // Pause polling while hidden
+                    if (this.portfolioRefreshInterval) {
+                        clearInterval(this.portfolioRefreshInterval);
+                        this.portfolioRefreshInterval = null;
+                    }
+                } else {
+                    // Resume and refresh immediately when visible again
+                    this.loadPortfolioOverview();
+                    this.loadPositions();
+                    // restart interval
+                    this.startPortfolioAutoRefresh();
+                }
+            };
+
+            document.addEventListener('visibilitychange', this.visibilityHandler);
+        }
     }
 
     // Portfolio utility functions
@@ -1341,54 +1401,15 @@ Object.assign(TradingDashboard.prototype, {
     loadSettingsPanel() {
         const settingsContent = document.getElementById('settings-content');
         if (!settingsContent) {
-            const settingsSection = document.getElementById('settings');
-            if (settingsSection) {
-                settingsSection.innerHTML = '<div id="settings-content"></div>';
-                return this.loadSettingsPanel();
-            }
             return;
         }
-        
-        let html = '<div class="module-settings" style="padding: 20px;">';
-        html += '<h3>Module Configuration</h3>';
-        html += '<p style="color: #aaa; margin-bottom: 20px;">Toggle modules on/off to focus on specific features during development.</p>';
-        html += '<div class="module-toggles" style="display: grid; gap: 15px;">';
-        
-        for (const [moduleId, config] of Object.entries(this.moduleConfig)) {
-            const isEnabled = config.enabled;
-            const hasLocalOverride = this.localModuleOverrides.hasOwnProperty(moduleId);
-            
-            html += `
-                <div class="module-toggle-item" style="display: flex; justify-content: space-between; align-items: center; padding: 15px; background: rgba(255,255,255,0.05); border-radius: 8px;">
-                    <div class="module-info" style="flex: 1;">
-                        <h4 style="margin: 0 0 5px 0; color: #fff;">${config.name || moduleId}</h4>
-                        <p style="margin: 0; color: #aaa; font-size: 14px;">${config.description || ''}</p>
-                        ${config.dependencies?.length ? `<small style="color: #888;">Dependencies: ${config.dependencies.join(', ')}</small>` : ''}
-                        ${hasLocalOverride ? '<span style="background: #ff6b6b; color: white; padding: 2px 8px; border-radius: 4px; font-size: 11px; margin-left: 10px;">Local Override</span>' : ''}
-                    </div>
-                    <label style="position: relative; display: inline-block; width: 60px; height: 34px;">
-                        <input type="checkbox" 
-                               class="module-toggle" 
-                               data-module="${moduleId}" 
-                               ${isEnabled ? 'checked' : ''}
-                               style="opacity: 0; width: 0; height: 0;">
-                        <span style="position: absolute; cursor: pointer; top: 0; left: 0; right: 0; bottom: 0; background-color: ${isEnabled ? '#4CAF50' : '#ccc'}; transition: .4s; border-radius: 34px;">
-                            <span style="position: absolute; content: ''; height: 26px; width: 26px; left: ${isEnabled ? '30px' : '4px'}; bottom: 4px; background-color: white; transition: .4s; border-radius: 50%;"></span>
-                        </span>
-                    </label>
-                </div>
-            `;
+
+        if (settingsContent.hasAttribute('hx-get')) {
+            // HTMX will populate this section, so no JS rendering needed.
+            return;
         }
-        
-        html += '</div>';
-        html += '<div class="settings-actions" style="margin-top: 30px; display: flex; gap: 10px;">';
-        html += '<button class="action-btn primary" id="apply-module-settings" style="padding: 10px 20px;">Apply Changes</button>';
-        html += '<button class="action-btn secondary" id="reset-module-settings" style="padding: 10px 20px;">Reset to Defaults</button>';
-        html += '</div>';
-        html += '</div>';
-        
-        settingsContent.innerHTML = html;
-        this.setupModuleToggleListeners();
+
+        settingsContent.innerHTML = '<div class="text-sm text-slate-500">Module settings unavailable.</div>';
     },
     
     setupModuleToggleListeners() {

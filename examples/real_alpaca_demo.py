@@ -8,16 +8,24 @@ import sys
 import json
 import requests
 import logging
+from pathlib import Path
 from datetime import datetime, timedelta
 from typing import Dict, List, Optional
 import warnings
 warnings.filterwarnings('ignore')
 
-# Add current directory to path
-sys.path.append(os.path.dirname(os.path.abspath(__file__)))
+# Ensure project and examples directories are on sys.path
+EXAMPLES_DIR = Path(__file__).resolve().parent
+PROJECT_ROOT = EXAMPLES_DIR.parent
+SRC_DIR = PROJECT_ROOT / 'src'
 
-from config import CONFIG, setup_logging
-from simple_trader import SimpleXGBoostTrader
+for extra_path in (EXAMPLES_DIR, SRC_DIR):
+    path_str = str(extra_path)
+    if path_str not in sys.path:
+        sys.path.insert(0, path_str)
+
+from algotrendy.config import CONFIG, setup_logging
+from simple_trader import SimpleMLTrader
 from dotenv import load_dotenv
 
 # Load environment variables
@@ -31,7 +39,7 @@ class RealAlpacaMLDemo:
         self.logger = logging.getLogger(__name__)
         
         # Initialize ML trader
-        self.ml_trader = SimpleXGBoostTrader()
+        self.ml_trader = SimpleMLTrader()
         
         # Alpaca configuration
         self.api_key = os.getenv('ALPACA_API_KEY')

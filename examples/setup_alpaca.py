@@ -74,7 +74,7 @@ def test_connection():
         from dotenv import load_dotenv
         load_dotenv()
         
-        from alpaca_integration import AlpacaIntegratedTrader
+        from algotrendy.alpaca_integration import AlpacaIntegratedTrader
         
         api_key = os.getenv('ALPACA_API_KEY')
         secret_key = os.getenv('ALPACA_SECRET_KEY')

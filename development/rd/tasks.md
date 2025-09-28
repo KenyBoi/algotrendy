@@ -81,6 +81,35 @@ Develop self-evolving trading strategies that adapt to changing market condition
 - Out-of-sample performance: >10% improvement
 - Risk-adjusted returns: Maintain Sharpe ratio >1.5
 
+---
+
+### Task 004: ML Model Development Refinements
+**Status**: 🟡 In Progress | **Priority**: Medium | **Assignee**: ML Team
+**Start Date**: 2024-12-01 | **Target Completion**: 2025-01-31
+**Current Sprint**: Fix naming inconsistency and implement model validation framework
+
+**Objective**:
+Address minor issues and enhance ML model implementations for better accuracy and maintainability.
+
+**Subtasks**:
+- [x] Fix naming inconsistency in simple_trader.py (labeled as XGBoost but uses RandomForest)
+- [x] Replace placeholder ML training code in main.py with actual implementations
+- [x] Add comprehensive model validation and testing framework
+- [x] Implement model performance monitoring and drift detection
+- [ ] Create automated model retraining pipelines
+- [ ] Add feature importance analysis and interpretation tools
+
+**Key Metrics**:
+- Code clarity: 100% accurate naming and documentation
+- Model reliability: >95% test coverage for ML components
+- Performance monitoring: Real-time model health tracking
+
+**Risks & Mitigations**:
+- Breaking changes → Implement gradual migration with backward compatibility
+- Performance degradation → Comprehensive testing before deployment
+
+---
+
 ## 🧪 Experimental Results
 
 ### Experiment 001: AI Provider Comparison
@@ -156,3 +185,25 @@ Develop self-evolving trading strategies that adapt to changing market condition
 ---
 
 *Last updated: $(date)*
+
+### Task 005: Immediate Stabilization
+**Status**: Completed | **Priority**: Critical | **Assignee**: Platform Team
+**Objective**:
+Reduce operational risk by removing exposed secrets and enforcing sane logging defaults.
+
+**Subtasks**:
+- [x] Rotate and purge committed API credentials (.env hygiene)
+- [x] Add .env and other secret artifacts to gitignore
+- [x] Replace always-on file handler with guarded/rotating logging setup
+- [x] Remove oversized historical log artifacts from the repository
+
+### Task 006: Package & Interface Hygiene
+**Status**: Completed | **Priority**: High | **Assignee**: Platform Team
+**Objective**:
+Align imports, dependency declarations, and demos with the actual package layout.
+
+**Subtasks**:
+- [x] Convert src/ into proper Python package and update imports
+- [x] Consolidate dependency definitions (pyproject vs requirements)
+- [x] Fix demo/test import paths so they no longer rely on sys.path hacks
+- [x] Repair failing AI orchestrator tests (Config import, async mocks)

@@ -14,8 +14,8 @@ warnings.filterwarnings('ignore')
 # Add current directory to path
 sys.path.append(os.path.dirname(os.path.abspath(__file__)))
 
-from config import CONFIG, setup_logging
-from alpaca_integration import AlpacaIntegratedTrader, ALPACA_AVAILABLE
+from algotrendy.config import CONFIG, setup_logging
+from algotrendy.alpaca_integration import AlpacaIntegratedTrader, ALPACA_AVAILABLE
 from xgboost_trader import XGBoostTrader
 
 # For environment variables
@@ -355,3 +355,4 @@ def main():
 
 if __name__ == "__main__":
     main()
+

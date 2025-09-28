@@ -11,7 +11,7 @@ project_root = Path(__file__).parent
 sys.path.append(str(project_root))
 
 from main import AlgoTrendyApp
-from config import CONFIG, logger
+from algotrendy.config import CONFIG, logger
 
 def main():
     """Run example analysis"""

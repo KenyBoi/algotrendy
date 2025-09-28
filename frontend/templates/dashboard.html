@@ -5,20 +5,24 @@
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
     <title>AlgoTrendy Trading Platform</title>
     <link rel="stylesheet" href="/static/css/dashboard.css">
+    <link rel="stylesheet" href="/static/css/tokens.css">
     <link href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.0.0/css/all.min.css" rel="stylesheet">
+    <script src="https://cdn.tailwindcss.com"></script>
+    <script src="https://unpkg.com/htmx.org@1.9.12" integrity="sha384-pa7mXj8m4piSozjVJ+BBwMc2J4dP8K9Fx+a3tu5p0zZp0Gsox48u74nUAN1fX8/R" crossorigin="anonymous"></script>
 </head>
 <body>
+    <a href="#overview" class="skip-link">Skip to main content</a>
     <div class="dashboard-container">
         <!-- Header -->
-        <header class="dashboard-header">
+    <header class="dashboard-header" role="banner">
             <div class="header-content">
                 <div class="logo">
                     <i class="fas fa-chart-line"></i>
                     <h1>AlgoTrendy</h1>
                 </div>
                 <div class="status-indicator">
-                    <div id="connection-status" class="status-badge">
-                        <i class="fas fa-circle"></i>
+                    <div id="connection-status" class="status-badge" role="status" aria-live="polite">
+                        <i class="fas fa-circle" aria-hidden="true"></i>
                         <span>Connecting...</span>
                     </div>
                 </div>
@@ -26,13 +30,13 @@
         </header>
 
         <!-- Main Content -->
-        <main class="dashboard-main">
+    <main class="dashboard-main" role="main" id="overview">
             <!-- Sidebar Navigation -->
-            <nav class="sidebar">
+            <nav class="sidebar" role="navigation" aria-label="Main Navigation">
                 <div class="nav-section">
                     <h3><i class="fas fa-tachometer-alt"></i> Dashboard</h3>
                     <ul>
-                        <li><a href="#overview" class="nav-link active">Overview</a></li>
+                        <li><a href="#overview" class="nav-link active" aria-current="page">Overview</a></li>
                         <li><a href="#portfolio" class="nav-link" data-module="portfolio">Portfolio</a></li>
                         <li><a href="#signals" class="nav-link" data-module="signals">Trading Signals</a></li>
                     </ul>
@@ -65,8 +69,8 @@
             </nav>
 
             <!-- Content Area -->
-            <div class="content-area">
-                <div id="overview" class="content-section active">
+                <div class="content-area">
+                <div class="content-section active">
                     <div class="section-header">
                         <h2><i class="fas fa-chart-area"></i> Platform Overview</h2>
                     </div>
@@ -92,6 +96,23 @@
                             <div class="large-stat-number warning-color" id="risk-score">2.4</div>
                             <div class="large-stat-label">Risk Score</div>
                             <div class="large-stat-sublabel">Current Portfolio</div>
+                        </div>
+                    </div>
+
+                    <div class="mt-6">
+                        <div class="bg-white shadow rounded-lg p-6 border border-gray-100">
+                            <div class="flex items-center justify-between mb-4">
+                                <h3 class="text-lg font-semibold text-gray-800"><i class="fas fa-brain mr-2 text-indigo-500"></i>Live Model Snapshot</h3>
+                                <span class="text-xs text-gray-500">Updates every 30s</span>
+                            </div>
+                            <div id="model-status-card" hx-get="/htmx/models" hx-trigger="load, every 30s" hx-swap="outerHTML" aria-live="polite">
+                                <!-- skeleton placeholder shown until HTMX replaces this fragment -->
+                                <div class="skeleton-card skeleton">
+                                    <div class="skeleton-line" style="width:40%"></div>
+                                    <div class="skeleton-line" style="width:60%"></div>
+                                    <div class="skeleton-line" style="width:30%"></div>
+                                </div>
+                            </div>
                         </div>
                     </div>
 
@@ -249,11 +270,11 @@
                         </div>
                     </div>
                     
-                    <div class="loading" id="models-loading">
-                        <i class="fas fa-spinner fa-spin"></i> Loading ML models...
+                    <div class="loading" id="models-loading" aria-hidden="true">
+                        <i class="fas fa-spinner fa-spin" aria-hidden="true"></i> Loading ML models...
                     </div>
                     
-                    <div id="models-content" class="models-grid" style="display: none;">
+                    <div id="models-content" class="models-grid" style="display: none;" aria-live="polite">
                         <!-- Models will be loaded here -->
                     </div>
                 </div>
@@ -551,11 +572,11 @@
                                 </div>
                             </div>
 
-                            <div id="positions-loading" class="loading">
-                                <i class="fas fa-spinner fa-spin"></i> Loading positions...
+                            <div id="positions-loading" class="loading" aria-hidden="true">
+                                <i class="fas fa-spinner fa-spin" aria-hidden="true"></i> Loading positions...
                             </div>
 
-                            <div id="positions-content" style="display: none;">
+                            <div id="positions-content" style="display: none;" aria-live="polite">
                                 <div class="positions-summary">
                                     <span id="positions-count">0 positions</span>
                                     <span id="positions-total-value">Total: $0.00</span>
@@ -592,9 +613,9 @@
                                                 <th>Actions</th>
                                             </tr>
                                         </thead>
-                                        <tbody id="positions-table-body">
-                                            <!-- Positions will be populated here -->
-                                        </tbody>
+                                                <tbody id="positions-table-body">
+                                                    <!-- Positions will be populated here -->
+                                                </tbody>
                                     </table>
                                 </div>
                             </div>
@@ -1319,8 +1340,8 @@
                     <div class="section-header">
                         <h2><i class="fas fa-sliders-h"></i> Settings & Configuration</h2>
                     </div>
-                    <div id="settings-content">
-                        <!-- Module settings will be loaded here dynamically -->
+                    <div id="settings-content" hx-get="/htmx/settings" hx-trigger="load" hx-swap="innerHTML">
+                        <noscript>Please enable JavaScript to view settings.</noscript>
                     </div>
                 </div>
             </div>

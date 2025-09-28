@@ -35,3 +35,7 @@ dependencies = [
     "xgboost>=3.0.5",
     "yfinance>=0.2.66",
 ]
+
+[tool.pytest.ini_options]
+pythonpath = ["src"]
+

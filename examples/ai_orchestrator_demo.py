@@ -7,10 +7,10 @@ to query multiple AI providers with intelligent routing and failover.
 
 import asyncio
 import os
-from ai_orchestrator import (
+from algotrendy.ai_orchestrator import (
     get_ai_orchestrator, AIQuery, QueryType, ProviderStatus
 )
-from config import Config
+from algotrendy.config import Config
 
 
 async def basic_query_demo():
@@ -211,3 +211,4 @@ async def main():
 
 if __name__ == "__main__":
     asyncio.run(main())
+

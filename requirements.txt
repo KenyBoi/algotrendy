@@ -1,0 +1,12 @@
+# Use ranges to support multiple Python versions (3.12/3.13) and avoid exact pins
+numpy>=2.3.3
+pandas>=2.3.2
+scikit-learn>=1.7.2
+# xgboost and other heavy ML packages are optional; install from requirements-ml.txt if needed
+joblib>=1.5
+yfinance>=0.2.27
+ta>=0.11.0
+requests>=2.31.0
+aiohttp>=3.8.4
+pyyaml>=6.0
+python-dateutil>=2.8.2

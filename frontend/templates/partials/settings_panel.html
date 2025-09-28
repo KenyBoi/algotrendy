@@ -1,0 +1,69 @@
+<div class="grid gap-6">
+    <section class="bg-white shadow rounded-xl border border-slate-200">
+        <div class="px-6 py-4 border-b border-slate-100">
+            <h3 class="text-lg font-semibold text-slate-800">System Controls</h3>
+            <p class="text-sm text-slate-500">Toggle core platform features. Changes take effect immediately.</p>
+        </div>
+        <div class="divide-y divide-slate-100">
+            <div class="flex items-center justify-between px-6 py-4">
+                <div>
+                    <p class="text-sm font-medium text-slate-800">Enable Risk Alerts</p>
+                    <p class="text-xs text-slate-500">Notify when portfolio drawdown exceeds configured thresholds.</p>
+                </div>
+                <label class="inline-flex items-center space-x-2">
+                    <input type="checkbox" class="h-5 w-5 text-indigo-600" checked>
+                    <span class="text-xs text-slate-500">Active</span>
+                </label>
+            </div>
+            <div class="flex items-center justify-between px-6 py-4">
+                <div>
+                    <p class="text-sm font-medium text-slate-800">Auto-Rebalancing</p>
+                    <p class="text-xs text-slate-500">Allow the scheduler to rebalance portfolios overnight.</p>
+                </div>
+                <label class="inline-flex items-center space-x-2">
+                    <input type="checkbox" class="h-5 w-5 text-indigo-600">
+                    <span class="text-xs text-slate-500">Disabled</span>
+                </label>
+            </div>
+            <div class="flex items-center justify-between px-6 py-4">
+                <div>
+                    <p class="text-sm font-medium text-slate-800">Email Summaries</p>
+                    <p class="text-xs text-slate-500">Send daily performance reports to configured recipients.</p>
+                </div>
+                <label class="inline-flex items-center space-x-2">
+                    <input type="checkbox" class="h-5 w-5 text-indigo-600" checked>
+                    <span class="text-xs text-slate-500">Enabled</span>
+                </label>
+            </div>
+        </div>
+    </section>
+
+    <section class="bg-white shadow rounded-xl border border-slate-200">
+        <div class="px-6 py-4 border-b border-slate-100">
+            <h3 class="text-lg font-semibold text-slate-800">Data Integrations</h3>
+            <p class="text-sm text-slate-500">Choose which providers feed the live dashboards.</p>
+        </div>
+        <div class="divide-y divide-slate-100">
+            <div class="flex items-center justify-between px-6 py-4">
+                <div>
+                    <p class="text-sm font-medium text-slate-800">Alpaca Market Data</p>
+                    <p class="text-xs text-slate-500">Stream live equity quotes and account details.</p>
+                </div>
+                <label class="inline-flex items-center space-x-2">
+                    <input type="checkbox" class="h-5 w-5 text-indigo-600" checked>
+                    <span class="text-xs text-slate-500">Connected</span>
+                </label>
+            </div>
+            <div class="flex items-center justify-between px-6 py-4">
+                <div>
+                    <p class="text-sm font-medium text-slate-800">Crypto Aggregator</p>
+                    <p class="text-xs text-slate-500">Pull order book + trade data from the preferred exchange.</p>
+                </div>
+                <label class="inline-flex items-center space-x-2">
+                    <input type="checkbox" class="h-5 w-5 text-indigo-600">
+                    <span class="text-xs text-slate-500">Disconnected</span>
+                </label>
+            </div>
+        </div>
+    </section>
+</div>

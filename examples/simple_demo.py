@@ -131,7 +131,7 @@ def train_xgboost_model(X, y, feature_names):
         'y_pred': y_pred_test,
         'y_pred_proba': y_pred_proba,
         'feature_importance': importance_df,
-        'classification_report': classification_report(y_test, y_pred_test)
+    'classification_report': classification_report(y_test, y_pred_test, zero_division=0)
     }
     
     return results
